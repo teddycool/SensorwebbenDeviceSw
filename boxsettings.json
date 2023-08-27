@@ -1,0 +1,15 @@
+{
+"calfactor": 200,
+"sleeptime": 120,
+
+"send_option": "url", 
+"target_url": "www.sensorwebben.se/dpost_value.php",
+
+"mqtthost":  "YOUR_MQTT_SERVER_HOST",
+"mqttport": 1883,
+"mqttuser": "your_mqyy_username",
+"mqttpw": "your_mqtt_pw",
+"humidity_topic:": "sensor/humidity",
+"temperature_topic": "sensor/temperature",
+"voltage_topic": "sensor/voltage"
+}

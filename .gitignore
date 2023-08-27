@@ -1,3 +1,9 @@
+.pio/*
+.vscode/*
+
+#My backup-files
+*.bak
+
 # Prerequisites
 *.d
 
