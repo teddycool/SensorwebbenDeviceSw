@@ -1,15 +1,12 @@
-{
-"calfactor": 200,
-"sleeptime": 120,
-
-"send_option": "url", 
-"target_url": "www.sensorwebben.se/dpost_value.php",
-
-"mqtthost":  "YOUR_MQTT_SERVER_HOST",
-"mqttport": 1883,
-"mqttuser": "your_mqyy_username",
-"mqttpw": "your_mqtt_pw",
-"humidity_topic:": "sensor/humidity",
-"temperature_topic": "sensor/temperature",
-"voltage_topic": "sensor/voltage"
+{"calfactor": 192.9,
+"sleeptime": 1800,
+"sendblink": true, 
+"send_option": "mqtt", 
+"url_server": "www.sensorwebben.se", 
+"url_resource": "/dpost_value.php",
+"mqtt_host":  "192.168.1.242",
+"mqtt_port": 1883,
+"mqtt_user": "mqtt",
+"mqtt_pw": "raspberry",
+"mqtt_topic": "{chipid}"
 }

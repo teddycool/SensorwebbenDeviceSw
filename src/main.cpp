@@ -1,10 +1,7 @@
 /*********
- * By teddycool, 
+ * By teddycool,
  *
- * Add capability to set sleep-time from return-value of http request
- * Add status message for wifi, ssid-name and signal strenght
- * Merged BDC ans BWS software, now they are the same but the type is a part of the settings
- * Future ToDos: BoxType as enum. Settings to move into a file/list for all boxes, use http request and json for values, add api-key or similar
+ *
  *
  *  *********/
 
@@ -16,40 +13,47 @@
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
 #include "DHT.h"
-#include <OneWire.h>
-#include <DallasTemperature.h>
+#include <PubSubClient.h>
 
-#define DHTPIN 5      
-#define DHTTYPE DHT11 
+#define DHTPIN 5
+#define DHTTYPE DHT11
 
 // Box and users settings:
-String boxid;             // The unique hw id for each box, actually arduino cpu-id
+String chipid; // The unique hw id for each box, actually arduino cpu-id
 
 // Settings, read from Sensorwebben each time
 const char *apname = "AP_SENSORWEBBEN";
 
-//Default values for data received from the server
-float calfactor = 200;             
-int64_t sleepTimeS = 3600;    // default sleep-time in seconds between measurements
-int maxtrieswifi = 20;        // default maximum number of retries for wifi connection before giving up
+// Default values for data received from the server
+float calfactor = 194.2;                                // Receives this from sebsorwebben
+int64_t sleepTimeS = 3600;                      // default sleep-time in seconds between measurements
+int maxtrieswifi = 20;                          // default maximum number of retries for wifi connection before giving up
+const char *send_option = "mqtt";               // = "url";
+const char *postserver = "www.sensorwebben.se"; // default receiving server
+const char *postresource = "/post_dvalue.php";  // Receiving script in the backend for posting measurements
 
+char *mqtt_host = "192.168.1.242";
+uint64_t mqtt_port = 1883;
+const char *mqtt_user = "mqtt";
+const char *mqtt_pw = "raspberry";
+char *mqtt_topic = "";
 
-const char *server = "www.sensorwebben.se";    // Backend server
-const char *mresource = "/post_value.php";     // Receiving script in the backend for measurements
-String sresource = "/post_status.php";         // Receiving script in the backend for status
+const char *server = "www.sensorwebben.se";   // Backend server for reading config
+const String sresource = "/post_dstatus.php"; // Receiving script in the backend for posting status-info and get the settingsfile
 
 // Program variables:
 WiFiClient boxclient;
+PubSubClient mqttClient(boxclient);
 ADC_MODE(ADC_TOUT);
 bool wificonfig = false;
 DynamicJsonDocument json(1024);
-
+DynamicJsonDocument payload(1024);
 
 //*******************************
 // Helper functions
 String getPostMsg(String pmeasurement, String pvalue, String punit)
 {
-  String ppost = "GET " + String(mresource) + "?devid=" + boxid + "&measm=" + pmeasurement + "&value=" + pvalue +
+  String ppost = "GET " + String(postresource) + "?chipid=" + chipid + "&measm=" + pmeasurement + "&value=" + pvalue +
                  "&unit=" + punit + " HTTP/1.1\r\n" + "Host: " + String(server) + "\r\n" + "Connection: close\r\n\r\n";
   Serial.println("Created measurement http request:");
   Serial.println(ppost);
@@ -58,10 +62,44 @@ String getPostMsg(String pmeasurement, String pvalue, String punit)
 
 String getStatusMsg(String ssid, String boxuid)
 {
-  String spost = String(sresource) + "?devid=" + boxuid + "&ssid=" + ssid;
+  String spost = String(sresource) + "?chipid=" + boxuid + "&ssid=" + ssid;
   Serial.println("Created status url:");
   Serial.println(spost);
   return spost;
+}
+
+void callback(char *topic, byte *payload, unsigned int length)
+{
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++)
+  {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+}
+
+void mqttreconnect()
+{
+  // Loop until we're reconnected
+  while (!mqttClient.connected())
+  {
+    Serial.print("Attempting MQTT connection...");
+    // Attempt to connect
+    if (mqttClient.connect("EspMqttClient", mqtt_user, mqtt_pw))
+    {
+      Serial.println("mqtt connected");
+    }
+    else
+    {
+      Serial.print("mqtt connection failed, rc=");
+      Serial.print(mqttClient.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
 }
 
 //*******************************
@@ -92,6 +130,8 @@ void setup()
       delay(1000);
     }
   }
+  mqttClient.setServer(mqtt_host, 1883);
+  mqttClient.setCallback(callback);
 }
 
 void loop()
@@ -110,9 +150,13 @@ void loop()
 
   if (WiFi.status() == WL_CONNECTED)
   {
-    
-    boxid = ESP.getChipId();
-    Serial.println("CHIPID: " + boxid);
+
+    //***********************
+    // Connection and info state
+    //***********************
+
+    chipid = ESP.getChipId();
+    Serial.println("CHIPID: " + chipid);
     Serial.println("WiFi status: " + String(WiFi.status()));
     Serial.println("WiFi connection ready!");
     Serial.println("Setting up power to sensors...");
@@ -120,37 +164,41 @@ void loop()
     delay(2000);
     Serial.println("Reading info from wifi access-point...");
     String ssid = WiFi.SSID();
-    String signalstr = String(WiFi.RSSI());
-    Serial.println("LOCAL IP adress: " + WiFi.localIP().toString());
+    int rssi = WiFi.RSSI();
+    String signalstr = String(rssi);
+
     Serial.println("Connected to SSID: " + ssid);
     Serial.println("Signal strenght: " + signalstr);
+    Serial.println("LOCAL IP adress: " + WiFi.localIP().toString());
 
-    Serial.println("Reading battery voltage on A0...");
-    int batterya = analogRead(A0);
-    Serial.println(String(batterya));
-    float batv = (float(batterya) / calfactor);
-    Serial.println(String(batv) + "V");
+    //***********************
+    // Get settings from  sensorwebben backend
+    //***********************
 
-    // First send status msg and get sleeptime etc...
     HTTPClient http;
-    String url = "http://" + String(server) + getStatusMsg(ssid, boxid);
+    String url = "http://" + String(server) + getStatusMsg(ssid, chipid);
     Serial.println(url);
     http.begin(boxclient, url);
     int httpCode = http.GET();
     if (httpCode > 0)
     {
-      // TODO: add some sanity check...
-      deserializeJson(json, http.getString());
+      String receivedjson = http.getString();
+      Serial.println(receivedjson);
+      deserializeJson(json, receivedjson);
       JsonObject obj = json.as<JsonObject>();
-      int32 tempsleep = obj[String("sleeptime")];
-      if (tempsleep > 4)
-      {
-        if (tempsleep < 3601)
-        {
-          sleepTimeS = tempsleep;
-          Serial.println("New sleeptime from server: " + String(sleepTimeS));
-        }
-      }
+      // TODO: add some sanity check...
+      //  send_option = obj[String("send_option")];
+      sleepTimeS = obj[String("sleeptime")];
+      calfactor = obj[String("calfactor")];
+
+      postserver = obj[String("url_server")];
+      postresource = obj[String("url_resource")];
+
+      //  mqtt_host = obj[String("mqtt_host")];
+      //  mqtt_port = obj[String("mqtt_port")];
+      //  mqtt_user = obj[String("mqtt_user")];
+      //  mqtt_pw = obj[String("mqtt_pw")];
+      // mqtt_topic = obj[String("mqtt_topic")];
     }
     else
     {
@@ -158,16 +206,28 @@ void loop()
     }
     http.end();
 
-    // Send common values for all box-types
-    boxclient.connect(server, 80);
-    boxclient.print(getPostMsg("bat", String(batv), "V"));
-    delay(500);
-    boxclient.connect(server, 80);
-    boxclient.print(getPostMsg("wifi", String(tries), "Count"));
-    delay(500);
-    boxclient.connect(server, 80);
-    boxclient.print(getPostMsg("rssi", signalstr, "raw"));
-    delay(500);
+    //***********************
+    // MQTT connect
+    //***********************
+
+    if (!mqttClient.connected())
+    {
+      mqttreconnect();
+    }
+    mqttClient.loop();
+
+    //***********************
+    // Make the measurements
+    //***********************
+
+    digitalWrite(15, HIGH);
+    Serial.println("Reading battery voltage on A0...");
+    int batterya = analogRead(A0);
+    Serial.println(String(batterya));
+    float batv = (float(batterya) / calfactor);
+    Serial.println(String(batv) + " V");
+
+    bool measurement = false;
 
     DHT dht(DHTPIN, DHTTYPE);
     dht.begin();
@@ -181,20 +241,67 @@ void loop()
     else
     {
       Serial.println("Done reading measurement from DHT sensor!");
-      boxclient.connect(server, 80);
-      boxclient.print(getPostMsg("temp", String(temp), "C"));
-      delay(500);
-      boxclient.connect(server, 80);
-      boxclient.print(getPostMsg("hum", String(hum), "%"));
-      delay(500);
+      measurement = true;
     }
+
+    //***********************
+    // URL send to backend
+    //***********************
+    if (send_option == "url")
+    {
+      boxclient.connect(server, 80);
+      boxclient.print(getPostMsg("bat", String(batv), "V"));
+      delay(500);
+      boxclient.connect(server, 80);
+      boxclient.print(getPostMsg("wifi", String(tries), "Count"));
+      delay(500);
+      boxclient.connect(server, 80);
+      boxclient.print(getPostMsg("rssi", signalstr, "raw"));
+      delay(500);
+      if (measurement)
+      {
+        boxclient.connect(server, 80);
+        boxclient.print(getPostMsg("temp", String(temp), "C"));
+        delay(500);
+        boxclient.connect(server, 80);
+        boxclient.print(getPostMsg("hum", String(hum), "%"));
+        delay(500);
+      }
+    }
+
+    //***********************
+    // MQTT send to backend
+    //***********************
+    if (send_option == "mqtt")
+    {
+      if (measurement)
+      {
+        Serial.println("MQTT send...");
+        // Prepare payload
+
+        payload["temperature"] = temp;
+        payload["humidity"] = hum;
+        payload["rssi"] = rssi;
+        payload["battery"] = batv;
+        String output;
+        serializeJson(payload, output);
+        mqttClient.publish(chipid.c_str(), output.c_str());
+      }
+      mqttClient.disconnect();
+    }
+
+    //***********************
+    // Turn off power
+    //***********************
   }
   Serial.println("End measuring cycle");
-
   Serial.println("Turning off power to sensors...");
+  digitalWrite(15, LOW);
   digitalWrite(13, LOW);
 
-  // Go to deep-sleep
+  //***********************
+  // Go to deep-sleep again
+  //***********************
   String secs = String(sleepTimeS).c_str();
   Serial.println("Going to sleep again....");
   uint32 micros = (uint32)sleepTimeS * 1000000;
