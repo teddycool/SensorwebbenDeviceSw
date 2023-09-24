@@ -22,7 +22,7 @@
 
 // Box and users settings:
 String chipid; // The unique hw id for each box, actually arduino cpu-id
-char *apname; 
+const char *apname = "AP_SENSORWEBBEN"; 
 
 // Settings, read from Sensorwebben each start or reset
 float calfactor;   
@@ -125,8 +125,6 @@ void setup()
     digitalWrite(15, HIGH);
     Serial.println("Config selected!");
     WiFiManager wifiManager;
-    chipid = ESP.getChipId();
-    strcpy(apname, chipid.c_str());
     wifiManager.startConfigPortal(apname);
 
     // If you get here you have connected to the WiFi

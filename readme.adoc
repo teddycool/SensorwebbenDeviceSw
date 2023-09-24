@@ -24,22 +24,6 @@ In this mode the sensor connects to the configured wifi, gets the settings-file 
 ### The development environment
 I use Visual Studio Code with PlatformIO extension but any Arduino type of enviroment should work.
 
-####  Good to know for dev
-
-To make serial work witout root for your <uname>: 
-[source,bash]
-----
-sudo usermod -a -G tty <uname>
-sudo usermod -a -G dialout <uname>
-----
-
-To find python3 in platformio: 
-[source,bash]
-----
-sudo apt install -y python3-venv 
-----
-
-
 ### The basic functions
 
 Settings are received each cycle from the backend in form of a simple json-file. 
@@ -55,5 +39,29 @@ Each measuring-cycle these things are measured and sent back as defined in the c
 The software then puts the ESP in deep-sleep for the time defined in the settingsfile, then restarts for a new cycle. However, the accurancy in the sleep-time is not that high... 
 
 
-image:doc/20230827_175425.jpg[Outside]
+####  Good to know for dev
+
+To make serial work witout root for your <uname>: 
+[source,bash]
+----
+sudo usermod -a -G tty <uname>
+sudo usermod -a -G dialout <uname>
+----
+
+To find python3 in platformio: 
+[source,bash]
+----
+sudo apt install -y python3-venv 
+----
+
+image:doc/programming-interface.jpg[PrgInterface]
+
+These 5 pins are the programming interface. From left:
+
+* +3V3
+* GND
+* Connect to TX of programmer
+* Connect to RX of programmer
+* Connect to GND to boot into programming-mode
+
 
