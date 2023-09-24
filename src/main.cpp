@@ -1,13 +1,15 @@
 /*********
  * By teddycool,
+ * https://github.com/teddycool/SensorwebbenDeviceSw
+ * This project contains the software for a sensor-device built around ESP8266.
+ * The hardware is sold by www.sensorwebben.se
  *
- *
- *
- *  *********/
+ * License: GPL-3.0
+ **********/
 
-#include <ESP8266WiFi.h>      //ESP8266 Core WiFi Library (you most likely already have this in your sketch)
-#include <DNSServer.h>        //Local DNS Server used for redirecting all requests to the configuration portal
-#include <ESP8266WebServer.h> //Local WebServer used to serve the configuration portal
+#include <ESP8266WiFi.h>     
+#include <DNSServer.h>        
+#include <ESP8266WebServer.h> 
 #include <WiFiManager.h>      //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <Wire.h>
 #include <ESP8266HTTPClient.h>
@@ -16,29 +18,32 @@
 #include <PubSubClient.h>
 
 #define DHTPIN 5
-#define DHTTYPE DHT11
+
 
 // Box and users settings:
 String chipid; // The unique hw id for each box, actually arduino cpu-id
+char *apname; 
 
-// Settings, read from Sensorwebben each time
-const char *apname = "AP_SENSORWEBBEN";
+// Settings, read from Sensorwebben each start or reset
+float calfactor;   
+int64_t sleepTimeS = 3600; //default sleep-time
+int maxtrieswifi = 20;     
+int maxtriesmqtt = 5;
+bool send_mqtt = false;
+bool send_url = false;
+bool send_blink = false;
+uint8_t dhttype;
 
-// Default values for data received from the server
-float calfactor = 194.2;                                // Receives this from sebsorwebben
-int64_t sleepTimeS = 3600;                      // default sleep-time in seconds between measurements
-int maxtrieswifi = 20;                          // default maximum number of retries for wifi connection before giving up
-const char *send_option = "mqtt";               // = "url";
-const char *postserver = "www.sensorwebben.se"; // default receiving server
-const char *postresource = "/post_dvalue.php";  // Receiving script in the backend for posting measurements
+const char *postserver; 
+const char *postresource ;  
 
-char *mqtt_host = "192.168.1.242";
-uint64_t mqtt_port = 1883;
-const char *mqtt_user = "mqtt";
-const char *mqtt_pw = "raspberry";
-char *mqtt_topic = "";
+const char *mqtt_host;
+uint64_t mqtt_port;
+const char *mqtt_user;
+const char *mqtt_pw;
+const char *mqtt_topic;
 
-const char *server = "www.sensorwebben.se";   // Backend server for reading config
+const char *server = "www.sensorwebben.se";   // Backend server for reading config 
 const String sresource = "/post_dstatus.php"; // Receiving script in the backend for posting status-info and get the settingsfile
 
 // Program variables:
@@ -46,7 +51,7 @@ WiFiClient boxclient;
 PubSubClient mqttClient(boxclient);
 ADC_MODE(ADC_TOUT);
 bool wificonfig = false;
-DynamicJsonDocument json(1024);
+
 DynamicJsonDocument payload(1024);
 
 //*******************************
@@ -54,7 +59,7 @@ DynamicJsonDocument payload(1024);
 String getPostMsg(String pmeasurement, String pvalue, String punit)
 {
   String ppost = "GET " + String(postresource) + "?chipid=" + chipid + "&measm=" + pmeasurement + "&value=" + pvalue +
-                 "&unit=" + punit + " HTTP/1.1\r\n" + "Host: " + String(server) + "\r\n" + "Connection: close\r\n\r\n";
+                 "&unit=" + punit + " HTTP/1.1\r\n" + "Host: " + String(postserver) + "\r\n" + "Connection: close\r\n\r\n";
   Serial.println("Created measurement http request:");
   Serial.println(ppost);
   return ppost;
@@ -82,9 +87,11 @@ void callback(char *topic, byte *payload, unsigned int length)
 
 void mqttreconnect()
 {
+  int tries = 0;
   // Loop until we're reconnected
-  while (!mqttClient.connected())
+  while ((!mqttClient.connected())  && (tries < maxtriesmqtt))
   {
+
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
     if (mqttClient.connect("EspMqttClient", mqtt_user, mqtt_pw))
@@ -96,8 +103,8 @@ void mqttreconnect()
       Serial.print("mqtt connection failed, rc=");
       Serial.print(mqttClient.state());
       Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
+      delay(2000);
+      tries++;
     }
   }
 }
@@ -118,6 +125,8 @@ void setup()
     digitalWrite(15, HIGH);
     Serial.println("Config selected!");
     WiFiManager wifiManager;
+    chipid = ESP.getChipId();
+    strcpy(apname, chipid.c_str());
     wifiManager.startConfigPortal(apname);
 
     // If you get here you have connected to the WiFi
@@ -130,8 +139,6 @@ void setup()
       delay(1000);
     }
   }
-  mqttClient.setServer(mqtt_host, 1883);
-  mqttClient.setCallback(callback);
 }
 
 void loop()
@@ -178,27 +185,49 @@ void loop()
     HTTPClient http;
     String url = "http://" + String(server) + getStatusMsg(ssid, chipid);
     Serial.println(url);
+    http.useHTTP10(true);
     http.begin(boxclient, url);
     int httpCode = http.GET();
     if (httpCode > 0)
     {
-      String receivedjson = http.getString();
-      Serial.println(receivedjson);
-      deserializeJson(json, receivedjson);
-      JsonObject obj = json.as<JsonObject>();
-      // TODO: add some sanity check...
-      //  send_option = obj[String("send_option")];
-      sleepTimeS = obj[String("sleeptime")];
-      calfactor = obj[String("calfactor")];
+      StaticJsonDocument<1024> json;
+      Serial.println("JSON received from back-end");
+      Serial.println("-----------------------");
+      DeserializationError error = deserializeJson(json, http.getStream());
+      // Test if parsing succeeds.
 
-      postserver = obj[String("url_server")];
-      postresource = obj[String("url_resource")];
+      
+      if (error)
+      {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+      }
+      else{
 
-      //  mqtt_host = obj[String("mqtt_host")];
-      //  mqtt_port = obj[String("mqtt_port")];
-      //  mqtt_user = obj[String("mqtt_user")];
-      //  mqtt_pw = obj[String("mqtt_pw")];
-      // mqtt_topic = obj[String("mqtt_topic")];
+   
+      if (json["dht11"]){
+        Serial.println("DHT11 specified in json");
+        dhttype= 11;
+      };
+
+      if (json["dht22"]){
+        Serial.println("DHT22 specified in json");
+        dhttype= 22;
+      };
+
+      send_mqtt = json["send_mqtt"];
+      send_blink = json["send_blink"];
+      send_url = json["send_url"];
+      sleepTimeS = json["sleeptime"].as<int64_t>();
+      calfactor = json["calfactor"].as<float>();
+      postserver = json["url_server"];
+      postresource = json["url_resource"];
+      mqtt_host = json["mqtt_host"];
+      mqtt_port = json["mqtt_port"].as<uint64_t>();
+      mqtt_user = json["mqtt_user"];
+      mqtt_pw = json["mqtt_pw"];
+      mqtt_topic = json["mqtt_topic"];
+      }
     }
     else
     {
@@ -207,20 +236,14 @@ void loop()
     http.end();
 
     //***********************
-    // MQTT connect
-    //***********************
-
-    if (!mqttClient.connected())
-    {
-      mqttreconnect();
-    }
-    mqttClient.loop();
-
-    //***********************
     // Make the measurements
     //***********************
 
-    digitalWrite(15, HIGH);
+    if (send_blink)
+    {
+      Serial.println("Turning on led");
+      digitalWrite(15, HIGH);
+    }
     Serial.println("Reading battery voltage on A0...");
     int batterya = analogRead(A0);
     Serial.println(String(batterya));
@@ -229,9 +252,11 @@ void loop()
 
     bool measurement = false;
 
-    DHT dht(DHTPIN, DHTTYPE);
+    DHT dht(DHTPIN, dhttype);
     dht.begin();
+    delay(200);
     Serial.println("Reading from DHT...");
+    Serial.println(dhttype);
     float hum = dht.readHumidity();
     float temp = dht.readTemperature();
     if (isnan(hum) || isnan(temp))
@@ -247,42 +272,61 @@ void loop()
     //***********************
     // URL send to backend
     //***********************
-    if (send_option == "url")
+    if (send_url)
     {
+      Serial.println("Sending data to url..");
       boxclient.connect(server, 80);
       boxclient.print(getPostMsg("bat", String(batv), "V"));
-      delay(500);
+      delay(200);
       boxclient.connect(server, 80);
       boxclient.print(getPostMsg("wifi", String(tries), "Count"));
-      delay(500);
+      delay(200);
       boxclient.connect(server, 80);
       boxclient.print(getPostMsg("rssi", signalstr, "raw"));
-      delay(500);
+      delay(200);
       if (measurement)
       {
         boxclient.connect(server, 80);
         boxclient.print(getPostMsg("temp", String(temp), "C"));
-        delay(500);
+        delay(200);
         boxclient.connect(server, 80);
         boxclient.print(getPostMsg("hum", String(hum), "%"));
-        delay(500);
+        delay(200);
       }
     }
 
     //***********************
     // MQTT send to backend
     //***********************
-    if (send_option == "mqtt")
+    if (send_mqtt)
     {
+      mqttClient.setServer(mqtt_host, mqtt_port);
+      mqttClient.setCallback(callback);
+      Serial.println("MQTT server settings");
+      Serial.println(mqtt_host);
+      Serial.println(mqtt_port);
+
+
+      //***********************
+      // MQTT connect
+      //***********************
       if (measurement)
       {
+        Serial.println("Sending data to mqtt..");
+        if (!mqttClient.connected())
+        {
+          mqttreconnect();
+        }
+        mqttClient.loop();
+
         Serial.println("MQTT send...");
         // Prepare payload
 
         payload["temperature"] = temp;
         payload["humidity"] = hum;
-        payload["rssi"] = rssi;
         payload["battery"] = batv;
+        payload["rssi"] = rssi;        
+        payload["wifitries"] = tries;
         String output;
         serializeJson(payload, output);
         mqttClient.publish(chipid.c_str(), output.c_str());

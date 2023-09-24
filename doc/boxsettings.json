@@ -1,0 +1,17 @@
+{
+    "sleeptime": "1800",
+    "send_blink": 1,
+    "send_url": 1,
+    "send_mqtt": 1,
+    "url_server": "www.sensorwebben.se",
+    "url_resource": "/post_dvalue.php",
+    "mqtt_host": "192.168.1.242",
+    "mqtt_port": "1883",
+    "mqtt_user": "mqtt-username",
+    "mqtt_pw": "mqtt-pw",
+    "mqtt_topic": "topic to post to",
+    "calfactor": 190.9,
+    "dht11": 1,
+    "dht22": 0,
+    "ds18b": 0
+}
