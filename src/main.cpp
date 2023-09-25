@@ -327,7 +327,7 @@ void loop()
         payload["wifitries"] = tries;
         String output;
         serializeJson(payload, output);
-        mqttClient.publish(chipid.c_str(), output.c_str());
+        mqttClient.publish(mqtt_topic, output.c_str());
       }
       mqttClient.disconnect();
     }
