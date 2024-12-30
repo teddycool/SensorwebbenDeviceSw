@@ -1,0 +1,10 @@
+ [
+    {"name": "temp","value": 24.1, "unit": "C"},
+    {"name": "hum", "value": 67, "unit": "%"},
+    {"name":"vbat", "value": 3.8, "unit": "V"},
+    {"name": "rbat", "value": 897, "unit": "-"},
+    {"name":"rssi", "value": -58, "unit": "-"},
+    {"name":"wifitries", "value": 3, "unit": "Count"},
+    {"name":"localip", "value": "192.168.68.113", "unit": "-"},
+    {"name":"ssid", "value": "dlink-4EEC", "unit": "-"}
+ ]

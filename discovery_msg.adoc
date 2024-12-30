@@ -1,0 +1,31 @@
+
+# The discovery message for Homeassistant
+
+This is the pattern for the config-msg sent to Homeassistant at sensor set-up. It is sent with the retain-flag set to true so it will be stored in the mqtt-broker and sent to Homeassistant at start-up.
+
+The sensor sends the message to the following topic: 
+
+homeassistant/sensor/sw_<devid>-<dclass>/config
+
+with the following format and content for each 'sensor' entity:
+
+
+[source,json]
+----
+{
+    "name": "<devid>-<dclass>",
+    "state_topic": "home/sensor/sw_<devid>",
+    "unit_of_measurement": "<unit>",
+    "device_class": "<dclass>",
+    "value_template": "{{ value_json.<dclass> }}",
+    "unique_id": "sw_<devid>-<dclass>",
+    "device": {
+        "identifiers": [
+            "sw_<devid>"
+        ],
+        "manufacturer": "www.sensorwebben.se",
+        "model": "Sensor Model GDC",
+        "sw_version": "2.2.1"
+    }
+}
+----

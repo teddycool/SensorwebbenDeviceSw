@@ -1,58 +1,59 @@
-## The sensor-device software
+# The sensor-device software
 
-This project contains the software for a sensor-device built around ESP8266.
+## Version 2.2.x
+ * Completely rewritten and only local configuration via the ap web-gui
+ * The connection to sensorwebben.se is completely removed
+ * Currently only works with mqtt
 
-The hardware is sold by www.sensorwebben.se but the circuit-diagram is included in this project for reference.
+## Purpose
 
-In the basic-configuration (shown below without the cover) the sensor-device is powered by 3xAAA and equiped with a DHT11 that measures temperature and humidity and works for indoor use. 
+This project contains the software for a sensor-device built around ESP8266 using a DHT11 or DHT22.
 
-image:doc/20230827_175357.jpg[Inside]
+image:doc/20230827_175357.jpg[PCB]
 
-The pcb has also a connection for I2C and any I2C-sensor can by used if the software is updated with support.
+Pre-built hardware is sold by www.sensorwebben.se but the circuit-diagram is included in this project for reference.
 
-The hardware also have optional support for DHT22 or a Dallas one-wire replacing the DHT11. Other hardware that can be added on the pcb is a HSM-circuit and also a LiPo-charger and a connector for use with rechargeble LiPo batteries instead of 3xAAA.
+The pre-built hardware also has connection for I2C and any I2C-sensor can by used if the software is updated with support.
+
+The pre-built hardware also have optional support for a Dallas one-wire, replacing the DHTx. Other hardware that can be added on the pcb is a HSM-circuit connected via I2C and also a LiPo-charger and a connector for use with rechargeble LiPo batteries instead of 3xAAA.
+
+### Pre-requisites for using the sensor-device
+
+WiFi coverage and an MQTT server that recieves the data. It is built and prepared for Home Assistant but will probably work for other systems as well but configuration out-of-the-box is now only supported for Home Assistant even if some topics can be changed in the parameters.
+
+#### Pre-requisites for Home Assistant
+Before setting-up and using the sensors you need to have a working Home Assistant installation. In addition to this you need to install an MQTT server and configure it in Home Assistant. Mosquitto is a good choice for the MQTT server.
+
+For more details on Home Assistant, visit: link:https://www.home-assistant.io/[Home Assistant]
+
 
 ### The sensor-device's way of working
-There are 2 different 'modes' controlled by the switch om the PCB.
+There are 2 different 'modes' controlled by the switch on the PCB.
 
-#### 1: WiFi configuration mode
-In this mode the sensor-device creates an accesspoint and starts a webserver where you can configure the wifi to use.
+#### 1: Configuration mode (switch away from the batteries)
+In this mode the sensor-device creates an accesspoint and starts a webserver where you can configure the wifi to use and also other parameters like your mqtt-server, topics and measuring interval.
 
-#### 2: Normal mode
-In this mode the sensor connects to the configured wifi, gets the settings-file from sensorwebben.se and then starts a meassuring cycle with the parameters from the settings-file.
+When the sensor connects to the wifi after a successful configuration it will send configuration messages directed to Home Assistant that will automatically set up one 'device' with one 'sensor' for each of the entities sent from the sensor-device.
+
+For more details, see the discovery message documentation: link:discovery_msg.adoc[Discovery Message]
+
+#### 2: STD mode (switch towards the batteries)
+In this mode the sensor connects to the configured wifi and mqtt-server and starts meassuring in cycles with the deep-sleep period defined by the parameter in-between.
+
+For more details, see the publish message documentation: link:publish_msg.adoc[Publish Message]
+
+##### Error indication (in std-mode)
+
+If the red led blinks a couple of times in STD mode, something is wrong.
+
+* 2 blink: the wifi-connection failed. Check your wifi-settings
+* 3 blink: the mqtt-connection failed. Check your mqtt-settings 
+* 4 or more: some internal error. Check the serial output for more info.
 
 ### The development environment
 I use Visual Studio Code with PlatformIO extension but any Arduino type of enviroment should work.
 
-### The basic functions
-
-Settings are received each cycle from the backend in form of a simple json-file. 
-
-Each measuring-cycle these things are measured and sent back as defined in the config file:
-
-* WiFi connection atempts before connect
-* WiFi signal strenght
-* Battery voltage-level
-* Temperature
-* Humidity
-
-The software then puts the ESP in deep-sleep for the time defined in the settingsfile, then restarts for a new cycle. However, the accurancy in the sleep-time is not that high... 
-
-
-####  Good to know for dev
-
-To make serial work witout root for your <uname>: 
-[source,bash]
-----
-sudo usermod -a -G tty <uname>
-sudo usermod -a -G dialout <uname>
-----
-
-To find python3 in platformio: 
-[source,bash]
-----
-sudo apt install -y python3-venv 
-----
+### The hardware, programming inteface
 
 image:doc/programming-interface.jpg[PrgInterface]
 
@@ -62,6 +63,4 @@ These 5 pins are the programming interface. From left:
 * GND
 * Connect to TX of programmer
 * Connect to RX of programmer
-* Connect to GND to boot into programming-mode
-
-
+* Connect to GND to boot into programming-mode before flashing new firmware
