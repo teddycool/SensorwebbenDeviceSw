@@ -7,11 +7,19 @@
  * The sw makes heavy use of https://github.com/tzapu/WiFiManager for
  *  the wifi- and mqtt-configuration
  *
- * SW v2.2.1 2024-12-30
+ * SW v2.2.2 2025-01-20
  * License: GPL-3.0
  ******************************************************************************
+ * Changes in this version:
+ * Added cal-factor to the configfile at setup and used from the file
+ * Added DHTTYPE to the configfile at setup and used from the file at runtime
+ * Cleaned up the code and fixed some bugs
+ * Changed behavior for failed MQTT at setup. Now it will hang with lit LED until reset
+ * Updated documentation
+ * Removed unused setting for configuration-topic (this might be added later when handled properly)
+ *
  * History:
- * ------------
+ * ------------ *
  * v 2.2.1:
  * Added MQTT discovery message for auto-config in Homeassistant
  * Restructured to be easier to follow the 'flow' in the code
@@ -36,10 +44,9 @@
 #include "led_blink.h"
 
 // Fixed settings
-#define SWVERSION "V2.2.1"
-#define DHTTYPE DHT11
-#define DHTPIN 5          // In some hw versions of esp8266 these pin-no are reversed sw-hw pin ie io5 -> pin-io4!
-float calfactor = 182; // Calibration factor for the battery voltage measurement
+#define DHTPIN 5               // In some hw versions of esp8266 these pin-no are reversed sw-hw pin ie io5 -> pin-io4!
+//#define DHTTYPE DHT22          // DHT 22 (AM2302)
+float calfactor = 182;         // Default calibration factor for the battery voltage measurement
 const int MAX_WIFI_TRIES = 10; // Maximum number of WiFi connection attempts
 
 WiFiServer server(80);
@@ -53,6 +60,7 @@ char sleeptime[5] = "60"; // minutes, 0 means max-time for the chip
 
 char mqtt_ptopic[50] = "";
 char mqtt_ctopic[50] = "";
+int dht_type = 22;
 
 int64_t sleeptimer;
 
@@ -109,8 +117,6 @@ void setup()
     pinMode(15, OUTPUT);
     digitalWrite(13, HIGH);
     digitalWrite(15, HIGH);
-     //   Serial.println("format file system");
-     //   SPIFFS.format();
     if (SPIFFS.begin())
     {
       Serial.println("Mounted file system");
@@ -139,6 +145,9 @@ void setup()
             strcpy(sleeptime, json["sleeptime"]);
             strcpy(mqtt_ptopic, json["mqtt_ptopic"]);
             strcpy(mqtt_ctopic, json["mqtt_ctopic"]);
+
+            dht_type = json["dht_type"].as<int>();
+            calfactor = json["calfactor"].as<float>();
           }
           else
           {
@@ -181,7 +190,7 @@ void setup()
     WiFiManagerParameter advanced_set_hd("<h2>Advanced config</h2>");
     WiFiManagerParameter advanced_set_text("<p>Don't touch when using Homeassistant default values!</p>");
     WiFiManagerParameter custom_mqtt_ptopic("ptopic", "mqtt publish-topic", mqtt_ptopic, 50);
-    WiFiManagerParameter custom_mqtt_ctopic("ctopic", "mqtt configuration-topic", mqtt_ctopic, 50);
+  //  WiFiManagerParameter custom_mqtt_ctopic("ctopic", "mqtt configuration-topic", mqtt_ctopic, 50);
 
     //
     wifiManager.addParameter(&custom_mqtt_server);
@@ -193,7 +202,7 @@ void setup()
     wifiManager.addParameter(&advanced_set_hd);
     wifiManager.addParameter(&advanced_set_text);
     wifiManager.addParameter(&custom_mqtt_ptopic);
-    wifiManager.addParameter(&custom_mqtt_ctopic);
+ //   wifiManager.addParameter(&custom_mqtt_ctopic);
 
     // set config save notify callback
     wifiManager.setSaveConfigCallback(saveConfigCallback);
@@ -216,7 +225,7 @@ void setup()
     strcpy(mqtt_user, custom_mqtt_user.getValue());
     strcpy(mqtt_pw, custom_mqtt_pw.getValue());
     strcpy(mqtt_ptopic, custom_mqtt_ptopic.getValue());
-    strcpy(mqtt_ctopic, custom_mqtt_ctopic.getValue());
+ //   strcpy(mqtt_ctopic, custom_mqtt_ctopic.getValue());
     strcpy(sleeptime, custom_sleeptime.getValue());
 
     Serial.println("The values in the file are: ");
@@ -239,6 +248,8 @@ void setup()
     json["mqtt_ptopic"] = mqtt_ptopic;
     json["mqtt_ctopic"] = mqtt_ctopic;
     json["sleeptime"] = sleeptime;
+    json["dht_type"] = dht_type;
+    json["calfactor"] = calfactor;
 
     File configFile = SPIFFS.open("/config.json", "w");
     if (!configFile)
@@ -407,25 +418,29 @@ void setup()
         if (!mqttClient.publish(configmsgtopic.c_str(), configmsg.c_str(), true))
         {
           Serial.println("Could not publish config message for  abat!");
-          Serial.println("MQTT state: " + String(mqttClient.state()));          
+          Serial.println("MQTT state: " + String(mqttClient.state()));
         }
         mqttClient.disconnect();
       }
       else
       {
-        Serial.print("MQTT connection FAILED at setup...");
+        Serial.println("MQTT connection FAILED at setup...");
+        Serial.println("Will hang here until reset is pressed...");
         while (true)
         { // Stuck here until config-switch is changed to normal and reset is pressed...
-          ledBlink(2000, 1000, 1);
+        delay(1000);
+        Serial.print("*");
         }
       }
     }
     else
     {
-      Serial.print("WIFI connection FAILED at setup...");
+      Serial.println("WIFI connection FAILED at setup...");
+      Serial.println("Will hang here until reset is pressed...");
       while (true)
       { // Stuck here until config-switch is changed to normal and reset is pressed...
-        Serial.println("MQTT connection FAILED at setup...");
+        delay(1000);
+        Serial.print("*");
       }
     }
 
@@ -437,7 +452,7 @@ void setup()
     { // Stuck here until config-switch is changed to normal and reset is pressed...
       digitalWrite(15, HIGH);
       delay(1000);
-      Serial.println("WIFI connection FAILED at setup...");
+      digitalWrite(15, LOW);
       delay(1000);
     }
   }
@@ -508,6 +523,8 @@ void loop()
           strcpy(sleeptime, json["sleeptime"]);
           uint64_t port = json["mqtt_port"].as<uint64_t>();
           sleeptimer = json["sleeptime"].as<int64_t>();
+          calfactor = json["calfactor"].as<float>();
+          dht_type = json["dht_type"].as<uint8>();
 
           Serial.println("Parsed json:");
           Serial.println("The values in the file are: ");
@@ -518,6 +535,8 @@ void loop()
           Serial.println("\tmqtt_ptopic : " + String(mqtt_ptopic));
           Serial.println("\tmqtt_ctopic : " + String(mqtt_ctopic));
           Serial.println("\tsleeptime : " + String(sleeptime));
+          Serial.println("\tcalfactor : " + String(calfactor));
+          Serial.println("\tdht_type : " + String(dht_type));
 
           Serial.println("Reading battery voltage on A0...");
           abat = analogRead(A0);
@@ -527,7 +546,15 @@ void loop()
 
           bool measurement = false;
 
-          DHT dht(DHTPIN, DHTTYPE);
+          if(dht_type == 22){
+           Serial.println("DHTTYPE: DHT22");
+          }
+          else{
+           Serial.println("DHTTYPE: DHT11");
+          }
+
+          Serial.println("Setting up DHT sensor: " + String(DHTPIN) + " " + String(dht_type));
+          DHT dht(DHTPIN,dht_type);
           dht.begin();
           delay(200);
           Serial.println("Reading from DHT...");
@@ -615,6 +642,11 @@ void loop()
               ledBlink(500, 500, 3);
             }
           }
+          else{
+            Serial.println("Failed to measure, aborting..");
+            Serial.println("Blink measurement-error (6)");
+            ledBlink(500, 500, 6);
+          }
 
           Serial.println("End measuring cycle");
         }
@@ -654,8 +686,7 @@ void loop()
   else
   {
     micros = sleeptimer * 1000000 * 60;
-
-    Serial.println("Will sleep for " + String(sleeptimer / 60) + " minutes...");
+    Serial.println("Will sleep for " + String(sleeptimer) + " minutes...");
   }
   Serial.println("Going to sleep again....");
   ESP.deepSleep(micros); // uS!

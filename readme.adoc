@@ -1,21 +1,12 @@
-# The sensor-device software
-
-## Version 2.2.x
- * Completely rewritten and only local configuration via the ap web-gui
- * The connection to sensorwebben.se is completely removed
- * Currently only works with mqtt
-
-## Purpose
+## The sensor-device software
 
 This project contains the software for a sensor-device built around ESP8266 using a DHT11 or DHT22.
 
-image:doc/20230827_175357.jpg[PCB]
+Pre-built hardware is sold by www.sensorwebben.se but the circuit-diagram is included in this project for reference. In the near future all other design-files will be available in the project as well.
 
-Pre-built hardware is sold by www.sensorwebben.se but the circuit-diagram is included in this project for reference.
+The pre-built hardware has a connection for I2C and any I2C-sensor can by used if the software is updated with support.
 
-The pre-built hardware also has connection for I2C and any I2C-sensor can by used if the software is updated with support.
-
-The pre-built hardware also have optional support for a Dallas one-wire, replacing the DHTx. Other hardware that can be added on the pcb is a HSM-circuit connected via I2C and also a LiPo-charger and a connector for use with rechargeble LiPo batteries instead of 3xAAA.
+The pre-built hardware also have optional support for a Dallas one-wire, replacing the DHTx. Other hardware that can be added on the pcb is a HSM-circuit connected via I2C and a LiPo-charger and a connector for use with rechargeble LiPo batteries instead of 3xAAA.
 
 ### Pre-requisites for using the sensor-device
 
@@ -31,14 +22,22 @@ For more details on Home Assistant, visit: link:https://www.home-assistant.io/[H
 There are 2 different 'modes' controlled by the switch on the PCB.
 
 #### 1: Configuration mode (switch away from the batteries)
-In this mode the sensor-device creates an accesspoint and starts a webserver where you can configure the wifi to use and also other parameters like your mqtt-server, topics and measuring interval.
+In this mode the sensor-device creates an accesspoint and starts a webserver where you can configure the wifi to use and also other parameters like your mqtt-server,  measuring interval and topic.
 
 When the sensor connects to the wifi after a successful configuration it will send configuration messages directed to Home Assistant that will automatically set up one 'device' with one 'sensor' for each of the entities sent from the sensor-device.
+
+Example of the sensor-device added to homeassistant by the sensor-setup:
+
+image:doc/ha-added-sensor.png[The sensor added to homeassistant by the sensor-setup]
 
 For more details, see the discovery message documentation: link:discovery_msg.adoc[Discovery Message]
 
 #### 2: STD mode (switch towards the batteries)
 In this mode the sensor connects to the configured wifi and mqtt-server and starts meassuring in cycles with the deep-sleep period defined by the parameter in-between.
+
+Example of the sensor-device added to homeassistant and sending values:
+
+image:doc/ha-added-sensor-w-first-values.png[The sensor added to homeassistant by the sensor-setup]
 
 For more details, see the publish message documentation: link:publish_msg.adoc[Publish Message]
 
@@ -53,8 +52,13 @@ If the red led blinks a couple of times in STD mode, something is wrong.
 ### The development environment
 I use Visual Studio Code with PlatformIO extension but any Arduino type of enviroment should work.
 
-### The hardware, programming inteface
+### The hardware
 
+#### The PCB
+
+image:doc/hardware.jpg[PCB without enclosure]
+
+#### The programming interface
 image:doc/programming-interface.jpg[PrgInterface]
 
 These 5 pins are the programming interface. From left:

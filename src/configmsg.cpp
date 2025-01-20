@@ -21,7 +21,7 @@ String createConfigMsg(String deviceid, String dclass, String vname, String unit
 
     mqttconfigmsg["device"]["manufacturer"] = "www.sensorwebben.se";
     mqttconfigmsg["device"]["model"] = "Sensor Model GDC";
-    mqttconfigmsg["device"]["sw_version"] = "2.2.1";
+    mqttconfigmsg["device"]["sw_version"] = SWVERSION;
     mqttconfigmsg["device"]["name"] = deviceid;
 
     String outputmsg;
