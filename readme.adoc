@@ -63,7 +63,7 @@ image:doc/programming-interface.jpg[PrgInterface]
 
 These 5 pins are the programming interface. From left:
 
-* +3V3
+* +3V3 (only use this WITHOUT batteries installed)
 * GND
 * Connect to TX of programmer
 * Connect to RX of programmer
