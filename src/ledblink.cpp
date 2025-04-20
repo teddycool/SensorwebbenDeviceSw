@@ -1,13 +1,15 @@
+
+#include "deviceconfig.h"
 #include <Arduino.h>
-#include "led_blink.h"
+#include "ledblink.h"
 
 void ledBlink(int ontime, int offtime, int count)
 {
     for (int i = 0; i < count; i++)
     {
-        digitalWrite(15, HIGH);
+        digitalWrite(LEDPIN, HIGH);
         delay(ontime);
-        digitalWrite(15, LOW);
+        digitalWrite(LEDPIN, LOW);
         delay(offtime);
     }
 }

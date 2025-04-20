@@ -1,0 +1,12 @@
+{
+    "chipid": "14384888",
+    "mqtt_server": "192.168.68.100",
+    "mqtt_port": 1883,
+    "mqtt_user": "par",
+    "mqtt_pw": "Yeti1501",
+    "mqtt_ptopic": "home/sensor/sw_14384888",
+    "mqtt_dtopic": "homeassistant/sensor/sw_14384888/config",
+    "sleeptime": 3600,
+    "calfactor": 170.9091,
+    "dht_type": 22
+}

@@ -1,0 +1,14 @@
+{
+    "chipid": "chipid",
+    "mqtt_server": "local_mqtt_server",
+    "mqtt_port": "local_mqtt_port",
+    "mqtt_user": "local_mqtt_user",
+    "mqtt_pw": "local_mqtt_pw",
+    "mqtt_ptopic": "mqtt_ptopic",
+    "mqtt_dtopic": "mqtt_dtopic",
+    "sleeptime": "sleeptime",
+    "calfactor": "calfactor",
+    "dht22": true,
+    "dht11": false,
+    "hx711": false
+}

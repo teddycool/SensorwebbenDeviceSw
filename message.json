@@ -1,0 +1,15 @@
+{
+    "topic": "home/sensor/sw_14384888",
+    "payload": {
+        "chipid": "14384888",
+        "rssi": -58,
+        "localip": "192.168.2.167",
+        "ssid": "RUT240_B40A",
+        "calfactor": 135.3333,
+        "abat": 609,
+        "battery": 4.5,
+        "temperature": 22.1,
+        "humidity": 45.4
+    },
+    "retain": 0
+}
