@@ -5,9 +5,6 @@
 #include <Arduino.h>
 
 
-//extern const char* backendUlr = "http://"; // Not yet used in config or setup
-//extern const char* apikey = "32-m7nYGFH-mNr831hIGnlFcwOADdO302k0NBwxE-xP1kIJS9Qh3yHAqZDdz8igE9o2nFgj6ATbyoFrVBfC6qA";
-
 // WiFi credentials used for direct connection without portal
 extern const char* cssid ;
 extern const char* cpassword ;

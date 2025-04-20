@@ -1,6 +1,8 @@
 .pio/*
 .vscode/*
 
+#boxsecrets.cpp
+
 #My backup-files
 *.bak
 
