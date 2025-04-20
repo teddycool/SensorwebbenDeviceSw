@@ -6,7 +6,7 @@ v 3.0.0:
 
  * Generalized with software components that will be used by several main-configurations
  * Added support for remote connection to Nabu Casa via web-hook
- 
+
 
 This github-repo contains the software for a sensor-device built around ESP8266 using a DHT11 or DHT22.
 
@@ -29,6 +29,8 @@ For more details on Home Assistant, visit: link:https://www.home-assistant.io/[H
 
 ## The sensor-device's way of working
 There are 2 different 'modes' controlled by the switch on the PCB.
+
+image:doc/sensor-program-main-flow.png[The main-flow of the program]
 
 ### 1: Configuration mode (switch away from the batteries)
 In this mode the sensor-device creates an accesspoint and starts a webserver where you can configure the wifi to use and also other parameters like your mqtt-server,  measuring interval and topic.
@@ -91,8 +93,19 @@ The software uses two main interfaces:
 
 #### Currently implemented publishers
 
-* MqttPublisher: publishing to a local MQTT-server. Typically used for the normal Home Assistant user and it is possible to configure via the web-portal when setting up the wifi-connection.
-* HaRemoteClient: publishing to a remote server via https. Typically used to publish to a remote home-assistant instance via the NabuCasa cloud, VPN and a web-hook automation. This is not yet possible to configure via the webportal but is implemented in the code. To use this boxsecrets.cpp needs to be added with correct webhook-url and accesstoken for your home-assistant instance. It might be added to the configuration in the future
+##### MqttPublisher: 
+
+
+
+Publishing to a local MQTT-server. Typically used for the normal Home Assistant user and it is possible to configure via the web-portal when setting up the wifi-connection.
+
+image:doc/sensors-local-access.png[The sensors way of connecting locally]
+
+##### HaRemoteClient: 
+
+Publishing to a remote server via https. Typically used to publish to a remote home-assistant instance via the NabuCasa cloud, VPN and a web-hook automation. This is not yet possible to configure via the webportal but is implemented in the code. To use this boxsecrets.cpp needs to be added with correct webhook-url and accesstoken for your home-assistant instance. It might be added to the configuration in the future
+
+image:doc/sensors-remote-access.png[The sensors way of connecting remote]
 
 
 
