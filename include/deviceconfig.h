@@ -18,6 +18,6 @@
 #define WIFI_MAX_TRIES 10 // Number of tries to connect to wifi
 #define MQTT_MAX_TRIES 10 // Number of tries to connect to mqtt broker
 #define MQTT_RETRY_DELAY 1000 // Delay between mqtt connection attempts 
-#define DEFAULT_SLEEP_TIME 3600 // Default sleep time in seconds
+#define DEFAULT_SLEEP_TIME 2 // Default sleep time in minutes
 
 #endif

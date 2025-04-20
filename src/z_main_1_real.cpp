@@ -472,38 +472,28 @@ void loop()
     //***********************
     // Connection and info state
     //***********************
-    Serial.println("CHIPID: " + chipid);
     Serial.println("Setting up power to sensors...");
     digitalWrite(PWRPIN, HIGH);
 
     Serial.println("Reading info from wifi access-point...");
     String ssid = WiFi.SSID();
     int rssi = WiFi.RSSI();
-    String signalstr = String(rssi);
-
+    localIp = WiFi.localIP().toString();
+    Serial.println("Local IP address: " + localIp);
     Serial.println("Connected to SSID: " + ssid);
-    Serial.println("Signal strenght: " + signalstr);
-    Serial.println("LOCAL IP adress: " + WiFi.localIP().toString());
+    Serial.println("Signal strength: " + rssi);
 
-    // Allocate a static JsonDocument
+    // Allocate a static JsonDocument and start adding data to mqttpayload
     StaticJsonDocument<1024> mqttpayload;
     mqttpayload["chipid"] = chipid;
     mqttpayload["rssi"] = rssi;
-    mqttpayload["localip"] = WiFi.localIP().toString();
+    mqttpayload["localip"] = localIp;
     mqttpayload["ssid"] = ssid;
     mqttpayload["wifitries"] = wifitries;
 
     Serial.println("WiFi connection ready!");
     Serial.println("Starting measuring cycle");
-    Serial.println("CHIPID: " + chipid);
-    Serial.println("WiFi status: " + String(WiFi.status()));
-
-    Serial.println("Reading info from wifi access-point...");
-    ssid = WiFi.SSID();
-    localIp = WiFi.localIP().toString();
-    Serial.println("Local IP address: " + localIp);
-    Serial.println("Connected to SSID: " + ssid);
-    Serial.println("Signal strength: " + WiFi.RSSI());
+    Serial.println("WiFi status: " + String(WiFi.status()));    
 
     if (LittleFS.begin())
     {
@@ -518,7 +508,9 @@ void loop()
       File configFile = LittleFS.open("/config.json", "r");
       if (!configFile)
       {
-        Serial.println("Failed to open config file");
+        Serial.println("Failed to load json config, aborting..");
+        Serial.println("Blink config-file-error (5)");
+        ledBlink(500, 500, 5);
       }
       else
       {
@@ -580,23 +572,27 @@ void loop()
             Serial.println("MQTT_LOCAL is set to false");
             Serial.println("MQTT connection will be done via Nabu Casa web-hook");
             pubClient = new HaRemoteClient();
-            pubClient->publish(mqtt_ptopic, mqttpayload.as<String>(), false);
-            Serial.println("MQTT message published with remote client!");
+            bool mqttsuccess = pubClient->publish(mqtt_ptopic, mqttpayload.as<String>(), false);
+            if (mqttsuccess)
+            {
+              Serial.println("MQTT message published with remote client!");
+            }
+            else
+            {
+              Serial.println("MQTT message published failed!");
+              Serial.println("Blink mqtt-error (3)");
+              ledBlink(500, 500, 3);
+            }
           }
         }
         else
         {
-          Serial.println("Failed to load json config, aborting..");
+          Serial.println("Failed to deserialize json file, aborting..");
           Serial.println("Blink config-file-error (5)");
           ledBlink(500, 500, 5);
         }
-        configFile.close();
-      }
 
-      {
-        Serial.println("Failed to deserialize json file, aborting..");
-        Serial.println("Blink config-file-error (5)");
-        ledBlink(500, 500, 5);
+        configFile.close();
       }
     }
     else
