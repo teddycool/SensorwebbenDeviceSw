@@ -1,12 +1,15 @@
 {
-    "chipid": "14384888",
-    "mqtt_server": "192.168.68.100",
-    "mqtt_port": 1883,
-    "mqtt_user": "par",
-    "mqtt_pw": "Yeti1501",
-    "mqtt_ptopic": "home/sensor/sw_14384888",
-    "mqtt_dtopic": "homeassistant/sensor/sw_14384888/config",
-    "sleeptime": 3600,
-    "calfactor": 170.9091,
-    "dht_type": 22
+    "topic": "home/sensor/sw_12275499",
+    "payload": {
+        "chipid": "12275499",
+        "rssi": -53,
+        "localip": "192.168.2.108",
+        "ssid": "RUT240_B40A",
+        "calfactor": 188.2222,
+        "abat": 847,
+        "battery": 4.5,
+        "temperature": 25.5,
+        "humidity": 30.9
+    },
+    "retain": 0
 }

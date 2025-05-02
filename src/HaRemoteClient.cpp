@@ -6,62 +6,78 @@
  */
 #include "HaRemoteClient.h"
 #include "boxsecrets.h"
-#include <ESP8266HTTPClient.h>
+#include <WiFiClientSecure.h>
+#include <ESP8266WiFi.h>
+#include <Arduino.h>
 
-// Define the access token
+WiFiClientSecure client;
 
-HaRemoteClient::HaRemoteClient()
-{
-}
-
-bool HaRemoteClient::publish(const String &topic, const String &payload, bool retain)
-{
-    WiFiClientSecure *boxclient = new WiFiClientSecure;
-    HTTPClient https;
-    boxclient->setInsecure(); // Disable certificate validation for simplicity
+bool publish(const String &topic, const String &payload, bool retain)
+{    
+    client.setInsecure(); // Disable certificate validation for simplicity
     String message = createMessage(topic, payload, retain);
     Serial.println("Message: " + message);
     Serial.print("[HTTPS] begin...\n");
-    bool success = false;
-    if (https.begin(*boxclient, homeassistant_url)) // HTTPS
+    Serial.print("Connecting to: ");
+    Serial.println(homeassistant_host);
+    Serial.print("Connecting to: ");
+    Serial.println(homeassistant_uri);
+    Serial.print("Connecting to: ");
+    Serial.println(homeassistant_full_url);
+
+    Serial.print("DNS Server: ");
+    Serial.println(WiFi.dnsIP());
+
+    // Resolve host
+    IPAddress ip;
+    if (WiFi.hostByName(homeassistant_host, ip))
     {
-
-        https.addHeader("Content-Type", "application/json");
-        https.addHeader("Authorization", "Bearer " + access_token);
-
-        int httpCode = https.POST(message);
-        if (httpCode > 0)
-        {
-            Serial.printf("[HTTPS] GET... code: %d\n", httpCode);
-            if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
-            {
-                Serial.println("Payload received from backend");
-                Serial.println(https.getString());
-            }
-            success = true;
-        }
-        else
-        {
-            Serial.printf("[HTTPS]... failed, error: %s\n", https.errorToString(httpCode).c_str());
-        }
-        https.end();
-        boxclient->stop();
-        
+        Serial.print("Resolved IP: ");
+        Serial.println(ip);
     }
-    return success;
+    else
+    {
+        Serial.println("Failed to resolve host");
+    }
+
+    if (!client.connect(homeassistant_host, 443))
+    {
+        Serial.println("Connection to Home Assistant failed!");
+        return false;
+    }
+
+    String request = String("POST ") + homeassistant_uri + " HTTP/1.1\r\n" +
+                     "Host: " + homeassistant_host + "\r\n" +
+                     "Authorization: Bearer " + access_token + "\r\n" +
+                     "Content-Type: application/json\r\n" +
+                     "Content-Length: " + message.length() + "\r\n" +
+                     "\r\n" +
+                     message;
+
+    client.print(request);
+
+    while (client.connected())
+    {
+        String line = client.readStringUntil('\n');
+        if (line == "\r")
+        {
+            break;
+        }
+    }
+    Serial.println("Connection to Home Assistant SUCCEDED!");
+    String response = client.readString();
+    Serial.println("Response:");
+    Serial.println(response);
+    client.stop();
+    return true;
 }
 
-String HaRemoteClient::createMessage(const String &topic, const String &payload, bool retain)
+String createMessage(const String &topic, const String &payload, bool retain)
 {
     String message = "{";
     message += "\"topic\":\"" + topic + "\"" + ",";
     message += "\"payload\":" + payload + ",";
-    message += " \"retain\":" + String(retain);
+    message += "\"retain\":" + String(retain);
     message += "}";
     return message;
-}
-
-HaRemoteClient::~HaRemoteClient()
-{
-    
 }

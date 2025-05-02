@@ -1,7 +1,6 @@
 = The sensor-device
 
 :toc:
-:toclevels: 2
 :toc-title: Table of contents
 :toc-placement: auto
 
@@ -14,7 +13,6 @@ v 3.0.0:
  * Generalized with software components that will be used by several main-configurations
  * Added support for remote connection to Nabu Casa via web-hook
 
-:
 This github-repo contains the software for a sensor-device built around ESP8266 using a DHT11 or DHT22.
 
 The software runs on a pre-built hardware sold by www.sensorwebben.se but the 

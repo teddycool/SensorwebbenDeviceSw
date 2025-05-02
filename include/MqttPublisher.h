@@ -3,8 +3,10 @@
 
 #include <PubSubClient.h>
 #include <WiFiClient.h>
+#include "Publisher.h" // Ensure the base class is included
 
-class MqttPublisher {
+class MqttPublisher: public Publisher  
+{
 private:
     // Static variables for MQTT configuration
     static String chipId;
@@ -17,10 +19,10 @@ private:
 
 public:
     // Static methods for MQTT operations
-    static void initialize(String chipId, String mqtt_server, int mqtt_port, char* mqtt_user, char* mqtt_pw);
-    static bool publish(const String &topic, const String &payload, bool retain);
-    static bool connect();
-    static void disconnect();
+    void initialize(String chipId, String mqtt_server, int mqtt_port, char* mqtt_user, char* mqtt_pw);
+    bool publish(const String &topic, const String &payload, bool retain);
+     bool connect();
+     void disconnect();
 };
 
 #endif // MQTT_PUBLISHER_H

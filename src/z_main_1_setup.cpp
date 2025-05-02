@@ -23,6 +23,7 @@
 #include "DhtSensor.h"
 #include "MqttPublisher.h"
 #include "HaRemoteClient.h"
+#include "ConfigFile.h"
 
 // Box and users settings:
 String chipid; // The unique hw id for each box, actually arduino cpu-id
@@ -90,7 +91,7 @@ void loop()
   Serial.println("LOCAL IP adress: " + WiFi.localIP().toString());
 
   // Allocate a static JsonDocument
-  StaticJsonDocument<1024> mqttpayload;
+  DynamicJsonDocument mqttpayload(1024);
   mqttpayload["chipid"] = chipid;
   mqttpayload["rssi"] = rssi;
   mqttpayload["localip"] = WiFi.localIP().toString();
@@ -136,7 +137,7 @@ void loop()
     Serial.println("DHT sensor measurement failed");
   }
 
-  // Settings file
+  // Create JSON document for settings
   DynamicJsonDocument json(2048);
   json["chipid"] = chipid;
   json["mqtt_server"] = local_mqtt_server;
@@ -149,28 +150,21 @@ void loop()
   json["calfactor"] = calfactor;
   json["dht_type"] = DHTTYPE;
 
-  if (LittleFS.begin())
-  {
-    Serial.println("Mounted file system");
-
-    File configFile = LittleFS.open("/config.json", "w");
-    if (!configFile)
-    {
-      Serial.println("Failed to open config file for writing");
-    }
-    else
-    {
-      Serial.println("Succeeded to open config file for writing");
+  // Write settings to file
+  if (ConfigFile::writeToFile("/config.json", json)) {
       serializeJson(json, Serial);
-      serializeJson(json, configFile);
-      Serial.println();
-      Serial.println("Serialization of config file done and saved to LittleFS");
-    }
-    configFile.close();
+      Serial.println("Configuration saved to LittleFS");
+  } else {
+      Serial.println("Failed to save configuration");
   }
-  else
-  {
-    Serial.println("Failed to mount file system");
+
+  // Read settings back from file (optional, for testing)
+  DynamicJsonDocument readJson(2048);
+  if (ConfigFile::readFromFile("/config.json", readJson)) {
+      serializeJson(readJson, Serial);
+      Serial.println("Configuration read from LittleFS");
+  } else {
+      Serial.println("Failed to read configuration");
   }
 
   // Test sending to local and remote MQTT broker
@@ -190,14 +184,15 @@ void loop()
   }
   else
   {
-    HaRemoteClient haRemoteClient = HaRemoteClient();
+    Publisher *pubClient = nullptr;
+    pubClient = new HaRemoteClient();
     Serial.println("MQTT_LOCAL is set to false");
     Serial.println("Sending to remote mqtt broker");
     String payload;
     serializeJson(mqttpayload, payload);
     Serial.println("Payload: " + payload);
     Serial.println("Topic: " + mqtt_ptopic);
-    haRemoteClient.publish(mqtt_ptopic.c_str(), payload.c_str(), false);
+    pubClient->publish(mqtt_ptopic.c_str(), payload.c_str(), false);
     //haRemoteClient.~HaRemoteClient();
     Serial.println("MQTT publish done");
   }

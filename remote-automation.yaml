@@ -1,0 +1,27 @@
+
+# This automation is triggered by a webhook and publishes a message to an MQTT topic.
+# The topic, payload and retain flag are extracted from the JSON msg of the webhook.
+# The automation is set to run in single mode, meaning it will not allow concurrent executions.
+# The webhook_id should be replaced with a unique identifier for your webhook.
+# The automation is set to allow POST requests and is not restricted to local access only.
+# The MQTT payload is in turn a json structure fetched from the message
+
+- id: '1745128288405'
+  alias: MqttRemotePublish
+  description: ''
+  triggers:
+  - trigger: webhook
+    allowed_methods:
+    - POST
+    local_only: false
+    webhook_id: -xxxx
+  conditions: []
+  actions:
+  - action: mqtt.publish
+    metadata: {}
+    data:
+      topic: '{{ trigger.json.topic }}'
+      payload: '{{ trigger.json.payload | tojson }}'
+      retain: '{{ trigger.json.retain }}'
+      qos: '0'
+  mode: single

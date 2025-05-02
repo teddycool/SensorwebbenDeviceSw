@@ -2,7 +2,8 @@
 #ifndef DISCOVERYMSG_H
 #define DISCOVERYMSG_H
 
-#include <WString.h>
+#include <Arduino.h> // For Arduino String type
+//#include <WString.h>
 
 class DiscoveryMsg {
 public:
