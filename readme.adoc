@@ -9,6 +9,7 @@ This repository contains the software for sensor devices developed by Sensorwebb
 == Overview
 
 The software supports:
+
 * Interfacing with sensors like DHT11, DHT22, and HX711 (weight-scale).
 * Local communication with Home Assistant via MQTT.
 * Remote communication with Home Assistant via Nabu Casa web-hooks and MQTT trigger automation.
@@ -47,8 +48,9 @@ For more details on Home Assistant, visit: link:https://www.home-assistant.io/[H
 The sensor device operates in two modes, controlled by a switch on the PCB:
 
 === 1. Configuration Mode (Switch Away from Batteries)
+
 * **Local Software**: Creates an access point and web server for configuring WiFi, MQTT server, and other parameters.
-* **Remote Software**: Uses predefined parameters from `EspxConfig.h` for remote connection to Home Assistant via Nabu Casa.
+* **Remote Software**: Uses predefined parameters from `boxsecrets.cpp` for remote connection to Home Assistant via Nabu Casa.
 
 In both cases, the device sends configuration messages to Home Assistant, automatically setting up sensors and entities.
 
@@ -59,6 +61,7 @@ In both cases, the device sends configuration messages to Home Assistant, automa
 
 ==== Error Indication
 The red LED blinks to indicate errors:
+
 * **2 blinks**: WiFi connection failed.
 * **3 blinks**: MQTT connection failed.
 * **4+ blinks**: Internal error (check serial output for details).
@@ -67,6 +70,7 @@ The red LED blinks to indicate errors:
 
 === PCB
 The PCB is designed for DHT11/DHT22 sensors and includes connectors for:
+
 * I2C sensors.
 * Dallas one-wire sensors.
 * HSM circuits (via I2C).
@@ -76,6 +80,7 @@ image:doc/hardware.jpg[PCB without enclosure]
 
 === Programming Interface
 The PCB has a 5-pin programming interface:
+
 1. **+3V3**: Use only without batteries installed.
 2. **GND**
 3. **TX**: Connect to the programmer's TX pin.
