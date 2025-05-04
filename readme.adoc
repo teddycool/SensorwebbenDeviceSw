@@ -12,12 +12,19 @@ v 3.0.0:
 
  * Generalized with software components that will be used by several main-configurations
  * Added support for remote connection to Nabu Casa via web-hook
+ * Added support for ESP8266 setup remote
+ * Added support for ESP8266 real remote
 
-This github-repo contains the software for a sensor-device built around ESP8266 using a DHT11 or DHT22.
+v 3.0.1
 
+* Added support for ESP32 setup remote
+* Added support for HX711
+* 
+
+This github-repo contains the software for a sensor-device built around ESP8266 or ESP32. Supported sensor-types (so far) are DHT11, DHT22 and HX711 (weight-scale).
 The software runs on a pre-built hardware sold by www.sensorwebben.se but the 
 link:doc/circuit.pdf[Circuit-diagram]
-circuit-diagram is included in this project for reference. In the near future all other design-files will be available in the project as well.
+circuit-diagram for ESP8266 is included in this project for reference. In the near future all other design-files will be available in the project as well.
 
 The pre-built hardware has a connection for I2C and any I2C-sensor can by used if the software is updated with support.
 
@@ -74,14 +81,14 @@ The source-code can be built in two different ways using the plattformio build s
 The two environments are: 
 
 * real: for the real software that is used in the sensor-device 
-* setup: for the setup software that is used for testing and setting up the software on a new built hardware for the first time
+* setup: for software that is used for testing and setting up the software on a new built hardware for the first time
 
 === The software structure
 
 The software is structured in a way that makes it easy to add new sensors and new features. 
 The software main and setup uses a few classes and interfaces, used as building-blocks in the code.
 
-In platformio.ini there are two build-environments defined: `real` and `setup`. The `real` environment is used for the actual sensor-device, while the `setup` environment is used for the setup program. The setup program is used to configure the sensor-device and to test the hardware and software parts for a new hardware.
+In platformio.ini there are two types of build-environments defined: `real` and `setup`. The `real` environment is used for the actual sensor-device, while the `setup` environment is used for the setup program. The setup program is used to configure the sensor-device and to test the hardware and software parts for a new hardware.
 
 A settingsfile is used to store the settings for the sensor-device. The settingsfile is a JSON-file that contains all the settings for the sensor-device and the setup and main program uses this to use the correct implementaton of the classes and interfaces.
 

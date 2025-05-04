@@ -6,7 +6,20 @@
 
 #include "DiscoveryMsg.h"
 #include "ArduinoJson.h"
-#include "deviceconfig.h"
+
+//#include "Esp32Config.h"
+//#include "Esp8266Config.h"
+
+
+#if defined(CHIPTYPE) && CHIPTYPE == ESP32
+#include "Esp32Config.h"
+#elif defined(CHIPTYPE) && CHIPTYPE == ESP8266
+#include "Esp8266Config.h"
+#else
+#error "Unsupported CHIPTYPE. Please define CHIPTYPE as ESP8266 or ESP32."
+#endif
+
+
 
 
 // Create a serialized JSON string
@@ -37,7 +50,7 @@ String DiscoveryMsg::createDiscoveryMsg(const String &deviceid, const String &dc
     mqttconfigmsg["device"]["manufacturer"] = "www.sensorwebben.se";
     mqttconfigmsg["device"]["model"] = SENSORMODEL;
     mqttconfigmsg["device"]["sw_version"] = firmware;
-    mqttconfigmsg["device"]["hw_version"] = HWversion;
+    mqttconfigmsg["device"]["hw_version"] = HWVERSION;
     mqttconfigmsg["device"]["name"] = deviceid + " (sensorwebben)";
 
     String outputmsg;

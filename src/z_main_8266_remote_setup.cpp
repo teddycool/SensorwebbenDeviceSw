@@ -16,13 +16,15 @@
 
 #include <LittleFS.h> // Use LittleFS instead of SPIFFS
 #include "boxsecrets.h"
-#include "deviceconfig.h"
+#include "Esp8266Config.h"
 #include <ESP8266WiFi.h>
 #include <ArduinoJson.h>
 #include "DiscoveryMsg.h"
 #include "DhtSensor.h"
 #include "HaRemoteClient.h"
 #include "ConfigFile.h"
+
+#define CHIPTYPE ESP8266
 
 // Box and users settings:
 String chipid; // The unique hw id for each box, actually arduino cpu-id

@@ -7,8 +7,18 @@
 #include "HaRemoteClient.h"
 #include "boxsecrets.h"
 #include <WiFiClientSecure.h>
-#include <ESP8266WiFi.h>
+
 #include <Arduino.h>
+
+
+
+#if defined(CHIPTYPE) && CHIPTYPE == ESP32
+#include <WiFi.h>
+#elif defined(CHIPTYPE) && CHIPTYPE == ESP8266
+#include <ESP8266WiFi.h>
+#else
+#error "Unsupported CHIPTYPE. Please define CHIPTYPE as ESP8266 or ESP32."
+#endif
 
 WiFiClientSecure client;
 

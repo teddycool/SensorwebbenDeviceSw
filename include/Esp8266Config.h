@@ -1,10 +1,12 @@
-//Only defines for the device in this file 
-#ifndef DEVICECONFIG_H
-#define DEVICECONFIG_H
+// This file contains the configuration for the ESP8266 device.
+// It includes the pin definitions, sensor types, and other device-specific settings.
+#ifndef ESP8266CONFIG_H     
+#define ESP8266CONFIG_H
+
 
 #define SWVERSION "V3.0.0"
 #define COMTYPE "Remote Client"
-#define HWversion "V5.0 ESP8266"
+#define HWVERSION "V5.0 ESP8266"
 #define SENSORMODEL "Sensor Model GDC"
 
 // In some hw versions of esp8266 these pin-no are reversed sw-hw pin ie io5 -> pin-io4!

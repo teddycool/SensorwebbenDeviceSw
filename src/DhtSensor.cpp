@@ -1,26 +1,34 @@
 #include "DhtSensor.h"
-#include <deviceconfig.h>
 #include <Wire.h>
 #include "DHT.h"
-#include "ledblink.h"
+#include "LedBlinker.h"
+
+#if defined(CHIPTYPE) && CHIPTYPE == ESP32
+#include "Esp32Config.h"
+#elif defined(CHIPTYPE) && CHIPTYPE == ESP8266
+#include "Esp8266Config.h"
+#else
+#error "Unsupported CHIPTYPE. Please define CHIPTYPE as ESP8266 or ESP32."
+#endif
+
 // Constructor
 DhtSensor::DhtSensor(int pin, int type) : dhtpin(pin), dhttype(type), temperature(0.0), humidity(0.0), success(false) {}
 
 // Perform the DHT measurement
 bool DhtSensor::performMeasurement()
 {
-    DHT dht(DHTPIN, DHTTYPE);
+    DHT dht(dhtpin, dhttype);
     dht.begin();
     delay(1000);
 
-    Serial.println("Reading from " + String(DHTTYPE) + " sensor");
+    Serial.println("Reading from " + String(dhttype) + " sensor");
     humidity = dht.readHumidity();
     temperature = dht.readTemperature();
     if (isnan(humidity) || isnan(temperature))
     {
         Serial.println("Failed to read from DHT sensor!");
-        ledBlink(100, 100, 6);
-        Serial.println("Blink measurement-error (6)");
+     //   LedBlinker::ledBlink(LED_PIN,100, 100, 6);
+     //   Serial.println("Blink measurement-error (6)");
         success = false;
     }
     else
@@ -42,7 +50,7 @@ void DhtSensor::addToPayload(JsonDocument &payload)
     }
     else
     {
-        payload["error"] = "DHT measurement failed";
+        payload["dht"] = "Measurement failed";
     }
 }
 
