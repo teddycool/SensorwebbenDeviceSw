@@ -76,7 +76,7 @@ The PCB is designed for DHT11/DHT22 sensors and includes connectors for:
 * HSM circuits (via I2C).
 * LiPo charger and batteries (optional).
 
-image:doc/hardware.jpg[PCB without enclosure]
+image:doc/hardware.jpg[ESP8266 PCB without enclosure]
 
 === Programming Interface
 The PCB has a 5-pin programming interface:
@@ -85,12 +85,12 @@ The PCB has a 5-pin programming interface:
 2. **GND**
 3. **TX**: Connect to the programmer's TX pin.
 4. **RX**: Connect to the programmer's RX pin.
-5. **GND**: Connect to boot into programming mode before flashing firmware.
+5. **PGM**: Connect to GND for programming mode before flashing firmware.
 
 image:doc/programming-interface.jpg[Programming Interface]
 
 === Circuit Diagram
-The circuit diagram is included in the project: link:doc/circuit.pdf[Circuit Diagram].
+The circuit diagram for the ESP8266 sensor is included in the project: link:doc/circuit.pdf[Circuit Diagram].
 
 == Software Architecture
 
