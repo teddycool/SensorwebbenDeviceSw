@@ -1,149 +1,119 @@
-= The sensor-device
+= Sensorwebben Software Documentation
 
 :toc:
-:toc-title: Table of contents
+:toc-title: Table of Contents
 :toc-placement: auto
 
+This repository contains the software for sensor devices developed by Sensorwebben.se. The software is designed to run on ESP8266 and ESP32 microcontrollers, enabling communication with Home Assistant via MQTT or Nabu Casa web-hooks.
 
+== Overview
 
-This is the development-branch for sw version 3.x and is still a work in progress
+The software supports:
+* Interfacing with sensors like DHT11, DHT22, and HX711 (weight-scale).
+* Local communication with Home Assistant via MQTT.
+* Remote communication with Home Assistant via Nabu Casa web-hooks and MQTT trigger automation.
+* Configuration and testing of new hardware using setup software.
 
-v 3.0.0:
+The software is built using the PlatformIO build system and the Arduino framework, making it modular and extensible for adding new sensors and features.
 
- * Generalized with software components that will be used by several main-configurations
- * Added support for remote connection to Nabu Casa via web-hook
- * Added support for ESP8266 setup remote
- * Added support for ESP8266 real remote
+== Software Types
 
-v 3.0.1
+The software is divided into four main configurations for each microcontroller (ESP8266 and ESP32):
 
-* Added support for ESP32 setup remote
-* Added support for HX711
-* 
+1. **real-local**: For local communication with Home Assistant via MQTT.
+2. **real-remote**: For remote communication with Home Assistant via Nabu Casa web-hooks.
+3. **setup-local**: For testing and configuring new hardware with local communication.
+4. **setup-remote**: For testing and configuring new hardware with remote communication.
 
-This github-repo contains the software for a sensor-device built around ESP8266 or ESP32. Supported sensor-types (so far) are DHT11, DHT22 and HX711 (weight-scale).
-The software runs on a pre-built hardware sold by www.sensorwebben.se but the 
-link:doc/circuit.pdf[Circuit-diagram]
-circuit-diagram for ESP8266 is included in this project for reference. In the near future all other design-files will be available in the project as well.
+In the future, the setup-local and setup-remote configurations will be merged into a single setup software.
 
-The pre-built hardware has a connection for I2C and any I2C-sensor can by used if the software is updated with support.
+== Features
 
-The pre-built hardware also have optional support for a Dallas one-wire, replacing the DHTx. Other hardware that can be added on the pcb is a HSM-circuit connected via I2C and a LiPo-charger and a connector for use with rechargeble LiPo batteries instead of 3xAAA.
+* **Sensor Support**: DHT11, DHT22, HX711, and other I2C sensors.
+* **Power Management**: Deep sleep cycles with configurable intervals.
+* **Error Indication**: LED blinks to indicate errors (e.g., WiFi or MQTT connection issues).
+* **Modular Design**: Uses `Sensor` and `Publisher` interfaces for extensibility.
 
-== Pre-requisites for using the sensor-device
+== Prerequisites
 
-You need WiFi coverage and an MQTT server in your network that recieves the data. The software is built and prepared for Home Assistant but will probably work for other setups as well but configuration out-of-the-box is now only supported for Home Assistant even if some topics can be changed in the parameters.
+1. **WiFi Coverage**: Ensure the sensor device can connect to your WiFi network.
+2. **MQTT Server**: Install and configure an MQTT server (e.g., Mosquitto) in your Home Assistant setup.
+3. **Home Assistant**: A working Home Assistant installation is required for automatic device discovery and integration.
 
-=== Pre-requisites for Home Assistant
-Before setting-up and using the sensors you need to have a working Home Assistant installation. In addition to this you need to install an MQTT server and configure it in Home Assistant. Mosquitto is a good choice for the MQTT server, use the default settings for the MQTT server in Home Assistant.
+For more details on Home Assistant, visit: link:https://www.home-assistant.io/[Home Assistant].
 
-For more details on Home Assistant, visit: link:https://www.home-assistant.io/[Home Assistant]
+== How It Works
 
-== The sensor-device's way of working
-There are 2 different 'modes' controlled by the switch on the PCB.
+The sensor device operates in two modes, controlled by a switch on the PCB:
 
-image:doc/sensor-program-main-flow.png[The main-flow of the program]
+=== 1. Configuration Mode (Switch Away from Batteries)
+* **Local Software**: Creates an access point and web server for configuring WiFi, MQTT server, and other parameters.
+* **Remote Software**: Uses predefined parameters from `EspxConfig.h` for remote connection to Home Assistant via Nabu Casa.
 
-=== 1: Configuration mode (switch away from the batteries)
-In this mode the sensor-device creates an accesspoint and starts a webserver where you can configure the wifi to use and also other parameters like your mqtt-server,  measuring interval and topic.
+In both cases, the device sends configuration messages to Home Assistant, automatically setting up sensors and entities.
 
-When the sensor connects to the wifi after a successful configuration it will send configuration messages directed to Home Assistant that will automatically set up one 'device' with one 'sensor' for each of the entities sent from the sensor-device.
+=== 2. Standard Mode (Switch Towards Batteries)
+* Connects to the configured WiFi and MQTT server.
+* Measures sensor data in cycles with deep sleep intervals.
+* Publishes data to Home Assistant.
 
-Example of the sensor-device added to homeassistant by the sensor-setup:
+==== Error Indication
+The red LED blinks to indicate errors:
+* **2 blinks**: WiFi connection failed.
+* **3 blinks**: MQTT connection failed.
+* **4+ blinks**: Internal error (check serial output for details).
 
-image:doc/ha-added-sensor.png[The sensor added to homeassistant by the sensor-setup]
+== Hardware
 
-For more details, see the discovery message documentation: link:discovery_msg.adoc[Discovery Message]
-
-=== 2: STD mode (switch towards the batteries)
-In this mode the sensor connects to the configured wifi and mqtt-server and starts meassuring in cycles with the deep-sleep period defined by the parameter in-between.
-
-Example of the sensor-device added to homeassistant and sending values:
-
-image:doc/ha-added-sensor-w-first-values.png[The sensor added to homeassistant by the sensor-setup]
-
-For more details, see the publish message documentation: link:publish_msg.adoc[Publish Message]
-
-==== Error indication (in std-mode)
-
-If the red led blinks a couple of times in STD mode, something is wrong.
-
-* 2 blink: the wifi-connection failed. Check your wifi-settings
-* 3 blink: the mqtt-connection failed. Check your mqtt-settings 
-* 4 or more: some internal error. Check the serial output for more info.
-
-== The sensor-device software
-
-The software is written in C++ and is built using the Arduino framework. The software is built using the PlatformIO build system but can be built using the Arduino IDE as well.
-
-The source-code can be built in two different ways using the plattformio build system with environments. 
-
-The two environments are: 
-
-* real: for the real software that is used in the sensor-device 
-* setup: for software that is used for testing and setting up the software on a new built hardware for the first time
-
-=== The software structure
-
-The software is structured in a way that makes it easy to add new sensors and new features. 
-The software main and setup uses a few classes and interfaces, used as building-blocks in the code.
-
-In platformio.ini there are two types of build-environments defined: `real` and `setup`. The `real` environment is used for the actual sensor-device, while the `setup` environment is used for the setup program. The setup program is used to configure the sensor-device and to test the hardware and software parts for a new hardware.
-
-A settingsfile is used to store the settings for the sensor-device. The settingsfile is a JSON-file that contains all the settings for the sensor-device and the setup and main program uses this to use the correct implementaton of the classes and interfaces.
-
-==== Interfaces
-
-The software uses two main interfaces:
-
-1. `Sensor`: This interface is implemented by all sensor classes. It defines the methods required to initialize the sensor and retrieve data from it. Adding support for a new sensor involves creating a new class that implements this interface.
-
-2. `Publisher`: This interface is implemented by classes responsible for publishing data to external systems, such as MQTT. It defines methods for connecting to the server and sending data. To support a new publishing mechanism, create a class that implements this interface.
-
-==== Currently implemented sensors
-* DhtSensor: a wrapper for the DHT11 and DHT22 sensors. It uses the Adafruit DHT library to read data from the sensor. 
-
-==== Currently implemented publishers
-
-===== MqttPublisher: 
-
-
-
-Publishing to a local MQTT-server. Typically used for the normal Home Assistant user and it is possible to configure via the web-portal when setting up the wifi-connection.
-
-image:doc/sensors-local-access.png[The sensors way of connecting locally]
-
-===== HaRemoteClient: 
-
-Publishing to a remote server via https. Typically used to publish to a remote home-assistant instance via the NabuCasa cloud, VPN and a web-hook automation. This is not yet possible to configure via the webportal but is implemented in the code. To use this boxsecrets.cpp needs to be added with correct webhook-url and accesstoken for your home-assistant instance. It might be added to the configuration in the future
-
-image:doc/sensors-remote-access.png[The sensors way of connecting remote]
-
-
-
-=== The development environment
-Visual Studio Code with PlatformIO extension is used for the project.
-
-
-== The sensor-device hardware
-
-=== The PCB
+=== PCB
+The PCB is designed for DHT11/DHT22 sensors and includes connectors for:
+* I2C sensors.
+* Dallas one-wire sensors.
+* HSM circuits (via I2C).
+* LiPo charger and batteries (optional).
 
 image:doc/hardware.jpg[PCB without enclosure]
 
-The PCB is designed to be used with a DHT11 or DHT22 sensor. The PCB has a connector for the sensor and an optional connector for the I2C-bus. The PCB also has a connector for a Dallas one-wire sensor. The PCB has a connector for a HSM-circuit connected via I2C and a LiPo-charger and a connector for use with rechargeble LiPo batteries instead of 3xAAA.
+=== Programming Interface
+The PCB has a 5-pin programming interface:
+1. **+3V3**: Use only without batteries installed.
+2. **GND**
+3. **TX**: Connect to the programmer's TX pin.
+4. **RX**: Connect to the programmer's RX pin.
+5. **GND**: Connect to boot into programming mode before flashing firmware.
 
-==== The programming interface
-image:doc/programming-interface.jpg[PrgInterface]
+image:doc/programming-interface.jpg[Programming Interface]
 
-These 5 pins are the programming interface. From left:
+=== Circuit Diagram
+The circuit diagram is included in the project: link:doc/circuit.pdf[Circuit Diagram].
 
-* +3V3 (only use this WITHOUT batteries installed)
-* GND
-* Connect to TX of programmer
-* Connect to RX of programmer
-* Connect to GND to boot into programming-mode before flashing new firmware
+== Software Architecture
 
-==== The circuit diagram
+The software uses two main interfaces:
 
-The circuit link:doc/circuit.pdf[Circuit-diagram] is included in the project for reference. 
+1. **Sensor Interface**: Implemented by all sensor classes. Defines methods for initialization and data retrieval. Adding a new sensor involves creating a class that implements this interface.
+2. **Publisher Interface**: Implemented by classes responsible for publishing data (e.g., MQTT). Defines methods for connecting to servers and sending data.
+
+=== Implemented Sensors
+* **DhtSensor**: Supports DHT11 and DHT22 sensors using the Adafruit DHT library.
+* **Hx711Sensor**: Supports HX711 weight-scale sensors.
+
+=== Implemented Publishers
+* **MqttPublisher**: Publishes data to a local MQTT server.
+* **HaRemoteClient**: Publishes data to a remote Home Assistant instance via Nabu Casa web-hooks.
+
+== Development Environment
+
+The project uses Visual Studio Code with the PlatformIO extension. The software is written in C++ and structured for modularity and extensibility.
+
+== Future Plans
+
+* Merge local and remote setup software into a single configuration.
+* Add support for more sensors and hardware features.
+* Provide additional design files for hardware.
+
+== Additional Resources
+
+* link:discovery_msg.adoc[Discovery Message Documentation]
+* link:publish_msg.adoc[Publish Message Documentation]
+* link:https://www.home-assistant.io/[Home Assistant]
