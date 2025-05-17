@@ -167,3 +167,4 @@ The circuit diagram for the ESP8266 sensor is included in the project: link:doc/
 * link:doc/publish_msg.adoc[Publish Message Documentation]
 * link:doc/remote-automation.yaml[Example of remote automation for a web-hook]
 * link:https://www.home-assistant.io/[Home Assistant]
+* link:https://www.nabucasa.com/[Nabu Casa]
