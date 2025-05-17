@@ -21,8 +21,8 @@ public:
     // Static methods for MQTT operations
     void initialize(String chipId, String mqtt_server, int mqtt_port, char* mqtt_user, char* mqtt_pw);
     bool publish(const String &topic, const String &payload, bool retain);
-     bool connect();
-     void disconnect();
+    bool connect();
+    void disconnect();
 };
 
 #endif // MQTT_PUBLISHER_H

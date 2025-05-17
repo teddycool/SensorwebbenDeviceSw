@@ -4,9 +4,10 @@
 
 = Sensorwebben Software Documentation
 
-This repository contains the software for sensor devices developed by Sensorwebben.se. The software is designed to run on ESP8266 and ESP32 microcontrollers, enabling communication with Home Assistant via MQTT or Nabu Casa web-hooks.
+This repository contains the software for sensor devices developed by Sensorwebben.se. The software is designed to run on ESP8266 or ESP32 microcontrollers, enabling communication with Home Assistant via MQTT or Nabu Casa web-hooks.
 
-Pre-built hardware will soon be available for purchase on the Sensorwebben.se website. 
+Pre-built hardware will soon be available for purchase on the Sensorwebben.se website but circuit-diagrams will also soon available in this repository for those who want to build their own devices.
+
 
 == Overview
 
@@ -40,23 +41,23 @@ In the future, the setup-local and setup-remote configurations will be merged in
 == Prerequisites
 
 1. **WiFi Coverage**: Ensure the sensor device can connect to your WiFi network.
-2. **MQTT Server**: Install and configure an MQTT server (e.g., Mosquitto) in your Home Assistant setup.
-3. **Home Assistant**: A working Home Assistant installation is required for automatic device discovery and integration.
+2. **Home Assistant**: A working Home Assistant installation is required for automatic device discovery and integration.
+3. **MQTT Server**: Install and configure an MQTT server (e.g., Mosquitto) in your Home Assistant setup.
 
 For more details on Home Assistant, visit: link:https://www.home-assistant.io/[Home Assistant].
 
 == How It Works
 
-The sensor device operates in two modes, controlled by a switch on the PCB:
+The sensor device operates in two modes, controlled by a switch.
 
-=== 1. Configuration Mode (Switch Away from Batteries)
+=== 1. Configuration Mode
 
 * **Local Software**: Creates an access point and web server for configuring WiFi, MQTT server, and other parameters.
 * **Remote Software**: Uses predefined parameters from `boxsecrets.cpp` for remote connection to Home Assistant via Nabu Casa.
 
 In both cases, the device sends configuration messages to Home Assistant, automatically setting up sensors and entities.
 
-=== 2. Standard Mode (Switch Towards Batteries)
+=== 2. Standard Mode 
 * Connects to the configured WiFi and MQTT server.
 * Measures sensor data in cycles with deep sleep intervals.
 * Publishes data to Home Assistant.
@@ -68,33 +69,8 @@ The red LED blinks to indicate errors:
 * **3 blinks**: MQTT connection failed.
 * **4+ blinks**: Internal error (check serial output for details).
 
-== Hardware
 
-=== PCB
-The PCB is designed for DHT11/DHT22 sensors and includes connectors for:
-
-* I2C sensors.
-* Dallas one-wire sensors.
-* HSM circuits (via I2C).
-* LiPo charger and batteries (optional).
-
-image:doc/hardware.jpg[ESP8266 PCB without enclosure]
-
-=== Programming Interface
-The PCB has a 5-pin programming interface:
-
-1. **+3V3**: Use only without batteries installed.
-2. **GND**
-3. **TX**: Connect to the programmer's TX pin.
-4. **RX**: Connect to the programmer's RX pin.
-5. **PGM**: Connect to GND for programming mode before flashing firmware.
-
-image:doc/programming-interface.jpg[Programming Interface]
-
-=== Circuit Diagram
-The circuit diagram for the ESP8266 sensor is included in the project: link:doc/circuit.pdf[Circuit Diagram].
-
-== Software Architecture
+== Software
 
 The software uses two main interfaces:
 
@@ -113,9 +89,75 @@ The software uses two main interfaces:
 
 The project uses Visual Studio Code with the PlatformIO extension. The software is written in C++ and structured for modularity and extensibility.
 
+The project includes a `platformio.ini` file for configuring the build environment. The software is built using the Arduino framework, which provides a simple and efficient way to develop applications for ESP8266 and ESP32 microcontrollers.
+The project is organized into several directories:
+
+* **src**: Contains the main source code for the project.
+* **include**: Contains header files for the project.
+* **lib**: Contains external libraries used in the project.
+* **test**: Contains unit tests for the project.
+* **doc**: Contains documentation files for the project.
+* **README.md**: Contains the main documentation for the project.
+* **LICENSE**: Contains the license information for the project.
+* **platformio.ini**: Contains the configuration for the PlatformIO build system.
+
+=== How to use the different environments
+
+The project defines multiple environments in the `platformio.ini` file to simplify building and uploading firmware for different hardware and use cases. Each environment corresponds to a specific configuration of the ESP8266 or ESP32 microcontroller.
+
+To select an environment from the platformio gui, open the PlatformIO extension in Visual Studio Code and select the desired environment from the drop-down menu. 
+
+Alternatively, you can use the command line to build and upload firmware for a specific environment.
+
+To build for a specific environment, use the PlatformIO command:
+
+    pio run -e <environment>
+
+To upload firmware to your device, use:
+
+    pio run -e <environment> -t upload
+
+Replace `<environment>` with the desired environment name from above.
+
+== Hardware
+
+=== ESP8266 PCB
+The PCB is designed for DHT11/DHT22 sensors and includes connectors for:
+
+* I2C sensors.
+* Dallas one-wire sensors.
+* HSM circuits (via I2C).
+* LiPo charger and batteries (optional).
+
+image:doc/hardware.jpg[ESP8266 PCB without enclosure]
+
+=== ESP32 PCB
+The PCB is designed for DHT11/DHT22 sensors and includes connectors for:
+
+* I2C sensors.
+* Dallas one-wire sensors.
+* LiPo charger and batteries (optional).
+* HX711 weight-scale sensors.
+
+
+=== Programming Interface
+Both the ESP8266 and ESP32 PCB has a 5-pin programming interface with the same 'pinning'. The pinout is as follows and the picture shows the ESP8266 variant
+
+1. **+3V3**: Use only without batteries installed.
+2. **GND**
+3. **TX**: Connect to the programmer's TX pin.
+4. **RX**: Connect to the programmer's RX pin.
+5. **PGM**: Connect to GND for programming mode before flashing firmware.
+
+image:doc/programming-interface.jpg[ESP8266 Programming Interface]
+
+=== Circuit Diagram
+The circuit diagram for the ESP8266 sensor is included in the project: link:doc/circuit.pdf[Circuit Diagram]. The circuit diagram for ESP32 will soon be available.
+
 == Future Plans
 
-* Merge local and remote setup software into a single configuration.
+* Merge local and remote setup-software into a single configuration.
+* Merge local and remote real-software into a single configuration. This needs refactoring of the publisher-interface
 * Add support for more sensors and hardware features.
 * Provide additional design files for hardware.
 

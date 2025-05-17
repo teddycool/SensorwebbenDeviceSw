@@ -1,5 +1,5 @@
 // Add your secrets and rename to boxsecrets.cpp    
-// bosxsecrets.cpp is and must be IGNORED by git
+// boxsecrets.cpp is and must be IGNORED by git
 
 #include "boxsecrets.h"
 

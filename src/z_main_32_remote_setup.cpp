@@ -13,7 +13,7 @@
 ** 5: save the settingsfile to the device (LittleFS)
 
 **********/
-
+#define CHIPTYPE ESP32 // Define the chip type as ESP32
 #include <LittleFS.h> // Use LittleFS instead of SPIFFS
 #include "boxsecrets.h"
 #include "Esp32Config.h"

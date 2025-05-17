@@ -1,4 +1,4 @@
-
+#define CHIPTYPE "ESP32" // Define the chip type as ESP32
 #include <LittleFS.h> // Use LittleFS instead of SPIFFS
 #include "boxsecrets.h"
 #include "Esp32Config.h"
@@ -298,7 +298,7 @@ void loop()
     digitalWrite(PWRPIN, LOW);
 
     //FULFIX... remove
-    sleeptime = 5;
+    //sleeptime = 5;
    
     Serial.println("Going to sleep again....");
     int64_t micros = sleeptime * 60 * 1000000;
