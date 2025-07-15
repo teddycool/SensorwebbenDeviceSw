@@ -1,4 +1,4 @@
-#define CHIPTYPE "ESP32" // Define the chip type as ESP32
+#define CHIPTYPE ESP32 // Define the chip type as ESP32
 #include <LittleFS.h> // Use LittleFS instead of SPIFFS
 #include "boxsecrets.h"
 #include "Esp32Config.h"
@@ -74,23 +74,23 @@ void setup()
             String configmsg;
             String configmsgtopic;
 
-            Serial.println("-------------------------------------");
-            Serial.println("Creating config msg for temperature");
-            configmsg = discoveryMsg.createDiscoveryMsg(chipid, "temperature", "temperature", "°C");
-            configmsgtopic = discoveryMsg.createDiscoveryMsgTopic(chipid, "temperature");
-            publish(configmsgtopic, configmsg, true);
-            Serial.println("Discovery message: " + configmsg);
-            Serial.println("Discovery topic: " + configmsgtopic);
-            Serial.println("Discovery message sent");
+            // Serial.println("-------------------------------------");
+            // Serial.println("Creating config msg for temperature");
+            // configmsg = discoveryMsg.createDiscoveryMsg(chipid, "temperature", "temperature", "°C");
+            // configmsgtopic = discoveryMsg.createDiscoveryMsgTopic(chipid, "temperature");
+            // publish(configmsgtopic, configmsg, true);
+            // Serial.println("Discovery message: " + configmsg);
+            // Serial.println("Discovery topic: " + configmsgtopic);
+            // Serial.println("Discovery message sent");
 
-            Serial.println("-------------------------------------");
-            Serial.println("Creating config msg for humidity");
-            configmsg = discoveryMsg.createDiscoveryMsg(chipid, "humidity", "humidity", "%");
-            configmsgtopic = discoveryMsg.createDiscoveryMsgTopic(chipid, "humidity");
-            publish(configmsgtopic, configmsg, true);
-            Serial.println("Discovery message: " + configmsg);
-            Serial.println("Discovery topic: " + configmsgtopic);
-            Serial.println("Discovery message sent");
+            // Serial.println("-------------------------------------");
+            // Serial.println("Creating config msg for humidity");
+            // configmsg = discoveryMsg.createDiscoveryMsg(chipid, "humidity", "humidity", "%");
+            // configmsgtopic = discoveryMsg.createDiscoveryMsgTopic(chipid, "humidity");
+            // publish(configmsgtopic, configmsg, true);
+            // Serial.println("Discovery message: " + configmsg);
+            // Serial.println("Discovery topic: " + configmsgtopic);
+            // Serial.println("Discovery message sent");
 
             Serial.println("-------------------------------------");
             Serial.println("Creating config msg for wifitries");
@@ -247,15 +247,15 @@ void loop()
             mqttpayload["abat"] = batterya;
             mqttpayload["battery"] = (batterya / calfactor);
 
-            DhtSensor dhtSensor(DHTPIN, DHTTYPE);
-            dhtSensor.performMeasurement();
-            dhtSensor.addToPayload(mqttpayload);
+        //    DhtSensor dhtSensor(DHTPIN, DHTTYPE);
+        //    dhtSensor.performMeasurement();
+        //    dhtSensor.addToPayload(mqttpayload);
 
             Hx711Sensor hx711Sensor(LOADCELL_DOUT_PIN , LOADCELL_SCK_PIN);
             hx711Sensor.performMeasurement();
             hx711Sensor.addToPayload(mqttpayload);
 
-            if(!hx711Sensor.isSuccess() || !dhtSensor.isSuccess())
+            if(!hx711Sensor.isSuccess() )
             {
                 Serial.println("Failed to read from sensors");
                 Serial.println("Blink sensor-error (6)");
@@ -301,11 +301,11 @@ void loop()
     //sleeptime = 5;
    
     Serial.println("Going to sleep again....");
-    int64_t micros = sleeptime * 60 * 1000000;
+    int64_t micros = sleeptime * 1000000;
     esp_sleep_enable_timer_wakeup(micros);
     Serial.print("Will sleep for ");
     Serial.print(sleeptime);
-    Serial.print(" minutes");
+    Serial.print(" seconds");
     delay(1000);
     Serial.flush();
     esp_deep_sleep_start();

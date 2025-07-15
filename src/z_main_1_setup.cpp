@@ -13,10 +13,11 @@
 ** 5: save the settingsfile to the device (LittleFS)
 
 **********/
+#define CHIPTYPE ESP8266 // Define the chip type as ESP8266
 
 #include <LittleFS.h> // Use LittleFS instead of SPIFFS
 #include "boxsecrets.h"
-#include "deviceconfig.h"
+#include "Esp8266Config.h"
 #include <ESP8266WiFi.h>
 #include <ArduinoJson.h>
 #include "DiscoveryMsg.h"
@@ -182,27 +183,27 @@ void loop()
     mqttPublisher.publish(mqtt_ptopic.c_str(), payload.c_str(), false);
     Serial.println("MQTT publish done");
   }
-  else
-  {
-    Publisher *pubClient = nullptr;
-    pubClient = new HaRemoteClient();
-    Serial.println("MQTT_LOCAL is set to false");
-    Serial.println("Sending to remote mqtt broker");
-    String payload;
-    serializeJson(mqttpayload, payload);
-    Serial.println("Payload: " + payload);
-    Serial.println("Topic: " + mqtt_ptopic);
-    pubClient->publish(mqtt_ptopic.c_str(), payload.c_str(), false);
-    //haRemoteClient.~HaRemoteClient();
-    Serial.println("MQTT publish done");
-  }
+  // else
+  // {
+  //   Publisher *pubClient = nullptr;
+  //   pubClient = new HaRemoteClient();
+  //   Serial.println("MQTT_LOCAL is set to false");
+  //   Serial.println("Sending to remote mqtt broker");
+  //   String payload;
+  //   serializeJson(mqttpayload, payload);
+  //   Serial.println("Payload: " + payload);
+  //   Serial.println("Topic: " + mqtt_ptopic);
+  //   pubClient->publish(mqtt_ptopic.c_str(), payload.c_str(), false);
+  //   //haRemoteClient.~HaRemoteClient();
+  //   Serial.println("MQTT publish done");
+  // }
 
   Serial.println("End measuring cycle");
   Serial.println("Turning off power to sensors...");
   digitalWrite(LEDPIN, LOW);
   digitalWrite(PWRPIN, LOW);
 
-  Serial.println("Will now deep-sleep for 10 seconds before next cycle ");
+  Serial.println("Will now deep-sleep for 100 seconds before next cycle ");
   //ESP.deepSleep(10000000); // uS!
-  delay(10000); // 10 seconds
+  delay(100000); // 10 seconds
 }

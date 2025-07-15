@@ -38,19 +38,20 @@
  * Currently only works with mqtt
  * OTA is enabled but not yet working fully, sorry...
  */
-
+#define CHIPTYPE ESP8266 // Define the chip type as ESP8266
 #include <LittleFS.h> // Use LittleFS instead of SPIFFS
 #include <ESP8266WiFi.h>
+#include "Esp8266Config.h"
 #include <DNSServer.h>
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 #include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
-#include "deviceconfig.h"
 #include "DiscoveryMsg.h"
 #include "DhtSensor.h"
 #include "MqttPublisher.h"
 #include "HaRemoteClient.h"
-#include "ledblink.h"
+#include "LedBlinker.h"
 #include "boxsecrets.h" // WiFi credentials and MQTT settings for remote connection
+#include "DiscoveryClient.h"
 
 WiFiServer server(80);
 
@@ -75,6 +76,7 @@ char *mqtt_dtopic;
 char *cchipid;
 
 String chipid;
+LedBlinker ledBlinker(LEDPIN); // LED blinker for status indication
 
 // flag for saving data
 bool shouldSaveConfig = false;
@@ -107,6 +109,7 @@ void setup()
   Serial.println("CPUID: " + chipid);
   pinMode(PWRPIN, OUTPUT);
   pinMode(LEDPIN, OUTPUT);
+
   if ((MQTT_LOCAL == true) && (digitalRead(MODEPIN) == HIGH))
   {
     Serial.println("MQTT_LOCAL is set to true and config-mode selected");
@@ -182,7 +185,10 @@ void setup()
     WiFiManagerParameter custom_mqtt_port("port", "mqtt server port", mqtt_port, 6);
     WiFiManagerParameter custom_mqtt_user("user", "mqtt server user", mqtt_user, 20);
     WiFiManagerParameter custom_mqtt_pw("pw", "mqtt server pw", mqtt_pw, 20);
-    WiFiManagerParameter custom_sleeptime("sleeptimer", "sleeptime (min)", sleeptimer, 5);
+
+    char sleeptimerStr[8];
+    snprintf(sleeptimerStr, sizeof(sleeptimerStr), "%lld", sleeptimer);    
+    WiFiManagerParameter custom_sleeptime("sleeptimer", "sleeptime in min", sleeptimerStr, 5);
     WiFiManagerParameter advanced_set_hd("<h2>Advanced config</h2>");
     WiFiManagerParameter advanced_set_text("<p>Don't touch when using Homeassistant default values!</p>");
     WiFiManagerParameter custom_mqtt_ptopic("ptopic", "mqtt publish-topic", mqtt_ptopic, 50);
@@ -222,7 +228,7 @@ void setup()
     strcpy(mqtt_pw, custom_mqtt_pw.getValue());
     strcpy(mqtt_ptopic, custom_mqtt_ptopic.getValue());
     //   strcpy(mqtt_dtopic, custom_mqtt_dtopic.getValue());
-    strcpy(sleeptimer custom_sleeptime.getValue());
+    sleeptimer = atoll(custom_sleeptime.getValue());
 
     Serial.println("The values in the file are: ");
     Serial.println("\tmqtt_server : " + String(mqtt_server));
@@ -284,134 +290,26 @@ void setup()
       Serial.println("WiFi SSID: " + String(WiFi.SSID()));
       Serial.println("Starting to send config messages..");
 
-      // Create the correct publisheer type
+      MqttPublisher pubClient;
+      pubClient.initialize(chipid, mqtt_server, atoi(mqtt_port), mqtt_user, mqtt_pw);
 
-      Publisher *pubClient = nullptr;
+      // Use DiscoverySession for all discovery/config messages
+      DiscoveryClient dclient(pubClient, chipid);
 
-      if (MQTT_LOCAL)
-      {
-        pubClient = new MqttPublisher();
-        pubClient->initialize(chipid, mqtt_server, atoi(mqtt_port), mqtt_user, mqtt_pw);
-        Serial.println("MQTT connection to local broker");
-      }
-      else
-      {
-        pubClient = new HaRemoteClient();
-        Serial.println("MQTT connection to remote broker");
-      }
-
-      //----------------------------------
-      // MQTT configuration for Homeassistant
-      // Create and send config messages
-      bool discoverysuccess = true;
-      bool pubsuccess = false;
-      String configmsg;
-      String configmsgtopic;
-
-      Serial.println("-------------------------------------");
-      Serial.println("Creating config msg for temperature");
-      configmsg = DiscoveryMsg::createDiscoveryMsg(chipid, "temperature", "temperature", "°C");
-      Serial.println();
-      Serial.println("Creating config message topic for temperature");
-      configmsgtopic = DiscoveryMsg::createDiscoveryMsgTopic(chipid, "temperature");
-      Serial.println(configmsgtopic);
-      pubsuccess = pubClient->publish(configmsgtopic.c_str(), configmsg.c_str(), true);
-      if (!pubsuccess)
-      {
-        Serial.println("Could not publish config message for temperature!");
-        discoverysuccess = false;
-      }
-
-      Serial.println("-------------------------------------");
-      Serial.println("Creating config msg for humidity");
-      configmsg = DiscoveryMsg::createDiscoveryMsg(chipid, "humidity", "humidity", "%");
-      Serial.println();
-      Serial.println("Creating config message topic for wifitries");
-      configmsgtopic = DiscoveryMsg::createDiscoveryMsgTopic(chipid, "humidity");
-      Serial.println(configmsgtopic);
-      pubsuccess = pubClient->publish(configmsgtopic.c_str(), configmsg.c_str(), true);
-      if (!pubsuccess)
-      {
-        Serial.println("Could not publish config message for humidity!");
-        discoverysuccess = false;
-      }
-
-      Serial.println("-------------------------------------");
-      Serial.println("Creating config msg for wifitries");
-      configmsg = DiscoveryMsg::createDiscoveryMsg(chipid, "none", "wifitries", "");
-      Serial.println();
-      Serial.println("Creating config message topic for humidity");
-      configmsgtopic = DiscoveryMsg::createDiscoveryMsgTopic(chipid, "wifitries");
-      Serial.println(configmsgtopic);
-      pubsuccess = pubClient->publish(configmsgtopic.c_str(), configmsg.c_str(), true);
-      if (!pubsuccess)
-      {
-        Serial.println("Could not publish config message for wifitries!");
-        discoverysuccess = false;
-      }
-
-      Serial.println("-------------------------------------");
-      Serial.println("Creating config msg for Voltage");
-      configmsg = DiscoveryMsg::createDiscoveryMsg(chipid, "voltage", "battery", "");
-      Serial.println();
-      Serial.println("Creating config message topic for voltage");
-      configmsgtopic = DiscoveryMsg::createDiscoveryMsgTopic(chipid, "voltage");
-      Serial.println(configmsgtopic);
-      pubsuccess = pubClient->publish(configmsgtopic.c_str(), configmsg.c_str(), true);
-      if (!pubsuccess)
-      {
-        Serial.println("Could not publish config message for voltage!");
-        discoverysuccess = false;
-      }
-
-      Serial.println("-------------------------------------");
-      Serial.println("Creating config msg for signal_strength");
-      configmsg = DiscoveryMsg::createDiscoveryMsg(chipid, "signal_strength", "rssi", "dB");
-      Serial.println();
-      Serial.println("Creating config message topic for signal_strength");
-      configmsgtopic = DiscoveryMsg::createDiscoveryMsgTopic(chipid, "rssi");
-      Serial.println(configmsgtopic);
-      pubsuccess = pubClient->publish(configmsgtopic.c_str(), configmsg.c_str(), true);
-      if (!pubsuccess)
-      {
-        Serial.println("Could not publish config message for signal_strength!");
-        discoverysuccess = false;
-      }
-
-      Serial.println("-------------------------------------");
-      Serial.println("Creating config msg for mqtt-count");
-      configmsg = DiscoveryMsg::createDiscoveryMsg(chipid, "none", "mqtttries", "");
-      Serial.println();
-      Serial.println("Creating config message topic for  mqtt-count");
-      configmsgtopic = DiscoveryMsg::createDiscoveryMsgTopic(chipid, "mqtttries");
-      Serial.println(configmsgtopic);
-      pubsuccess = pubClient->publish(configmsgtopic.c_str(), configmsg.c_str(), true);
-      if (!pubsuccess)
-      {
-        Serial.println("Could not publish config message for  mqtt-count!");
-        discoverysuccess = false;
-      }
-
-      Serial.println("-------------------------------------");
-      Serial.println("Creating config msg for abat");
-      configmsg = DiscoveryMsg::createDiscoveryMsg(chipid, "none", "abat", "");
-      Serial.println();
-      Serial.println("Creating config message topic for  abat");
-      configmsgtopic = DiscoveryMsg::createDiscoveryMsgTopic(chipid, "abat");
-      Serial.println(configmsgtopic);
-      pubsuccess = pubClient->publish(configmsgtopic.c_str(), configmsg.c_str(), true);
-      if (!pubsuccess)
-      {
-        Serial.println("Could not publish config message for  abat!");
-        discoverysuccess = false;
-      }
+      dclient.sendTemperature();
+      dclient.sendHumidity();
+      dclient.sendWifitries();
+      dclient.sendBattery();
+      dclient.sendSignalStrength();
+      dclient.sendMqttTries();
+      dclient.sendAbat();
     }
     else
     {
       Serial.println("WIFI connection FAILED at setup...");
       Serial.println("Will hang here until reset is pressed...");
       while (true)
-      { // Stuck here until config-switch is changed to normal and reset is pressed...
+      {
         delay(1000);
         Serial.print("*");
       }
@@ -422,7 +320,7 @@ void setup()
     Serial.println("WiFi setup and config- parameters are ready!");
     Serial.println("Waiting for user to change mode-switch and press reset");
     while (true)
-    { // Stuck here until config-switch is changed to normal and reset is pressed...
+    {
       digitalWrite(LEDPIN, HIGH);
       delay(1000);
       digitalWrite(LEDPIN, LOW);
@@ -504,7 +402,7 @@ void loop()
       {
         Serial.println("Failed to load json config, aborting..");
         Serial.println("Blink config-file-error (5)");
-        ledBlink(500, 500, 5);
+        ledBlinker.ledBlink(500, 500, 5);
       }
       else
       {
@@ -575,7 +473,7 @@ void loop()
             {
               Serial.println("MQTT message published failed!");
               Serial.println("Blink mqtt-error (3)");
-              ledBlink(500, 500, 3);
+              ledBlinker.ledBlink(500, 500, 3);
             }
             delete pubClient;
             Serial.println("Publisher deleted!");
@@ -585,7 +483,7 @@ void loop()
         {
           Serial.println("Failed to deserialize json file, aborting..");
           Serial.println("Blink config-file-error (5)");
-          ledBlink(500, 500, 5);
+          ledBlinker.ledBlink(500, 500, 5);
         }
 
         configFile.close();
@@ -595,7 +493,7 @@ void loop()
     {
       Serial.println("Filesystem failed to mount");
       Serial.println("Blink file-system-error (4)");
-      ledBlink(500, 500, 4);
+      ledBlinker.ledBlink(500, 500, 4);
     }
 
     LittleFS.end();
@@ -605,7 +503,7 @@ void loop()
   {
     Serial.println("WiFi connection failed!");
     Serial.println("Blink wifi-connection-error (3)");
-    ledBlink(500, 500, 3);
+    ledBlinker.ledBlink(500, 500, 3);
   }
 
   Serial.println("Turning off power to sensors...");

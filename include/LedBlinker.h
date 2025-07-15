@@ -3,16 +3,16 @@
 
 #include <Arduino.h>
 
-class LedBlinker {
+class LedBlinker
+{
 private:
-    int LEDPIN;
+    int ledpin;
 
 public:
     // Constructor to initialize the LED pin
-    LedBlinker(int LEDPIN);
+    LedBlinker(int Ledpin);
 
-    // Static method to blink the LED
-    static void ledBlink(int ledPin, int ontime, int offtime, int count);
+    void ledBlink(int ontime, int offtime, int count);
 };
 
 #endif // LEDBLINKER_H

@@ -17,6 +17,10 @@
 #define LOADCELL_SCK_PIN 12
 
 #define DHTTYPE 22 // DHT 11 or 22 (AM2302)
+#define DHT22 0 // DHT 11 or 22 (AM2302)
+#define DHT11 0 // DHT 11 or 22 (AM2302)
+#define DS18B 1 // DS18B20
+
 
 #define TEST_VOLTAGE 4.5
 
@@ -24,6 +28,6 @@
 #define WIFI_MAX_TRIES 10 // Number of tries to connect to wifi
 #define MQTT_MAX_TRIES 10 // Number of tries to connect to mqtt broker
 #define MQTT_RETRY_DELAY 1000 // Delay between mqtt connection attempts 
-#define DEFAULT_SLEEP_TIME 5 // Default sleep time in minutes
+#define DEFAULT_SLEEP_TIME_SEC 15 // Default sleep time in seconds
 
 #endif

@@ -139,6 +139,7 @@ void loop()
     Serial.println("Box in Normal mode");
   }
 
+  
   DhtSensor dhtSensor(DHTPIN, DHTTYPE);
   dhtSensor.performMeasurement();
   if (dhtSensor.isSuccess())
@@ -173,7 +174,7 @@ void loop()
   json["mqtt_pw"] = local_mqtt_pw;
   json["mqtt_ptopic"] = mqtt_ptopic;
   json["mqtt_dtopic"] = mqtt_dtopic;
-  json["sleeptime"] = DEFAULT_SLEEP_TIME;
+  json["sleeptime"] = DEFAULT_SLEEP_TIME_SEC;
   json["calfactor"] = calfactor;
   json["dht_type"] = DHTTYPE;
 
