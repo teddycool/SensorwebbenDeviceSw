@@ -272,7 +272,8 @@ void setup()
       Serial.println("Signal strength: " + String(WiFi.RSSI()) + " dBm");
       Serial.println("WiFi SSID: " + String(WiFi.SSID()));
       Serial.println("Starting to send config messages..");
-      MqttPublisher pubClient;
+      WiFiClient wifiClient;
+      MqttPublisher pubClient = MqttPublisher(wifiClient);
       pubClient.initialize(chipid, mqtt_server, atoi(mqtt_port), mqtt_user, mqtt_pw);
       DiscoveryClient dclient(pubClient, chipid);
 
@@ -281,8 +282,12 @@ void setup()
       dclient.sendWifitries();
       dclient.sendBattery();
       dclient.sendSignalStrength();
-      dclient.sendMqttTries();
+     // dclient.sendMqttTries();
       dclient.sendAbat();
+      dclient.sendLocalIp();
+      dclient.sendSsid();
+      dclient.sendCalfactor();
+
     }
     else
     {
@@ -426,9 +431,9 @@ void loop()
             serializeJson(mqttpayload, Serial);
             Serial.println();
             Serial.println("MQTT message topic: " + String(mqtt_ptopic));
-            MqttPublisher pubClient;
+            WiFiClient wifiClient;
+            MqttPublisher pubClient = MqttPublisher(wifiClient);
             pubClient.initialize(chipid, mqtt_server, atoi(mqtt_port), mqtt_user, mqtt_pw);
-            DiscoveryClient dclient(pubClient, chipid);
 
             String payload;
             serializeJson(mqttpayload, payload);

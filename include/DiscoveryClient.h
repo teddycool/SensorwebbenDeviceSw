@@ -2,12 +2,12 @@
 #define DISCOVERYCLIENT_H
 
 #include <Arduino.h>
-#include "Publisher.h"
+#include "MqttPublisher.h"
 
 class DiscoveryClient
 {
 public:
-    DiscoveryClient(Publisher &publisher, const String &chipid);
+    DiscoveryClient(MqttPublisher &mqttPblisher, const String &chipid);
 
     void sendWifitries();
     void sendBattery();
@@ -23,7 +23,7 @@ public:
     void sendMqttTries();
 
 private:
-    Publisher &publisher_;
+    MqttPublisher &mqttPublisher_;
     String chipid_;
 };
 

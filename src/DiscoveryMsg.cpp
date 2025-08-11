@@ -62,5 +62,5 @@ String DiscoveryMsg::createDiscoveryMsg(const String &deviceid, const String &dc
 // Create a discovery message topic
 String DiscoveryMsg::createDiscoveryMsgTopic(const String &deviceid, const String &vname)
 {
-    return "homeassistant/sensor/sw_" + deviceid + "_" + vname + "/config";
+    return "homeassistant/sensor/" + deviceid + "/sw_" + deviceid + "_" + vname + "/config";
 }

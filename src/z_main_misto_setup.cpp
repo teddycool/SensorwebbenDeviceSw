@@ -22,6 +22,7 @@
 #include "DhtSensor.h"
 #include "ConfigFile.h"
 #include "MqttPublisher.h"
+#include <WiFiClient.h>
 
 // Box and users settings:
 String chipid; // The unique hw id for each box, actually arduino cpu-id
@@ -33,6 +34,8 @@ String mqtt_dtopic;
 // Program variables:
 
 ADC_MODE(ADC_TOUT);
+
+WiFiClient wifiClient; // Create a WiFiClient instance for MQTT communication
 
 //*******************************
 // Main program setup and loop
@@ -172,8 +175,8 @@ void loop()
     String payload;
     serializeJson(mqttpayload, payload);
     Serial.println("MQTT-payload: " + payload);
-
-    MqttPublisher pubClient;
+    WiFiClient wifiClient;
+    MqttPublisher pubClient = MqttPublisher(wifiClient);
     pubClient.initialize(chipid, local_mqtt_server, 1883, local_mqtt_user, local_mqtt_pw);
     pubClient.publish(mqtt_ptopic.c_str(), payload.c_str(), false);
 

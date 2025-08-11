@@ -5,11 +5,12 @@
  */
 
 #include "MqttPublisher.h"
+#include <WiFiClient.h>
 
 
-MqttPublisher::MqttPublisher() {
-    mqttClient_ = PubSubClient(wifiClient_);
-}
+
+MqttPublisher::MqttPublisher(WiFiClient &wifiClient)
+    : mqttClient_(wifiClient) {}
 
 void MqttPublisher::initialize(const String &chipId, const String &mqtt_server, int mqtt_port, const String &mqtt_user, const String &mqtt_pw)
 {
@@ -24,7 +25,8 @@ void MqttPublisher::initialize(const String &chipId, const String &mqtt_server, 
     mqtt_port_ = mqtt_port;
     mqtt_user_ = mqtt_user;
     mqtt_pw_ = mqtt_pw;
-    mqttClient_.setServer(mqtt_server.c_str(), mqtt_port);    
+    mqttClient_.setServer(mqtt_server_.c_str(), mqtt_port_);
+    mqttClient_.setBufferSize(2048);
 }
 
 bool MqttPublisher::connect()
@@ -45,15 +47,11 @@ void MqttPublisher::disconnect()
 }
 
 bool MqttPublisher::publish(const String &topic, const String &payload, bool retain)
-{
-        if (!connect())
-    {
-        Serial.println("MQTT connection failed!");
-        return false;
-    }
-    bool publishSuccess = mqttClient_.publish(topic.c_str(), payload.c_str(), retain);
-    mqttClient_.loop();
-    delay(500); // Give time for message to be sent
+{   connect();
+    bool status = mqttClient_.publish(topic.c_str(), payload.c_str(), retain);
+    Serial.println("Publish status: " + String(status));
+    delay(100);
     disconnect();
-    return publishSuccess;
+    Serial.println("MQTT disconnected after publish.");
+    return status;
 }

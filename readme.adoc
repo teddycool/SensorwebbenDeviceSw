@@ -9,6 +9,8 @@ This repository contains the software for sensor devices developed by Sensorwebb
 Pre-built hardware is available for purchase on the Sensorwebben.se website but circuit-diagrams will also soon available in this repository for those who want to build their own devices.
 
 
+
+
 == Overview
 
 The software supports:
@@ -22,7 +24,7 @@ The software is built using the PlatformIO build system and the Arduino framewor
 
 == Software Types
 
-The software is divided into four main configurations for each microcontroller (ESP8266 and ESP32):
+The software is divided into four main configurations for each sensor-type:
 
 1. **real-local**: For local communication with Home Assistant via MQTT.
 2. **real-remote**: For remote communication with Home Assistant via Nabu Casa web-hooks.
@@ -33,9 +35,9 @@ In the future, the local and remote configurations will be merged into a single 
 
 == Features
 
-* **Sensor Support**: DHT11, DHT22, HX711, and other I2C sensors.
+* **Sensor Support**: DHT11, DHT22, HX711 and I2C sensors.
 * **Power Management**: Deep sleep cycles with configurable intervals.
-* **Error Indication**: LED blinks to indicate errors (e.g., WiFi or MQTT connection issues).
+* **Error Indication**: LED blinks to indicate errors (e.g. WiFi or MQTT connection issues).
 * **Modular Design**: Uses `Sensor` and `Publisher` interfaces for extensibility.
 
 == Prerequisites
@@ -62,13 +64,22 @@ In both cases, the device sends configuration messages to Home Assistant, automa
 * Measures sensor data in cycles with deep sleep intervals.
 * Publishes data to Home Assistant.
 
-==== Error Indication
+=== Error Indication
 The red LED blinks to indicate errors:
 
 * **2 blinks**: WiFi connection failed.
 * **3 blinks**: MQTT connection failed.
 * **4+ blinks**: Internal error (check serial output for details).
 
+=== Messaging
+The device sends two types of messages to Home Assistant:
+
+1. **Discovery Messages**: Sent during setup to configure the sensor in Home Assistant.
+2. **Publish Messages**: Sent during normal operation to report sensor data.    
+
+When configured, the sensor values shows up directly in Home Assistant default view.
+
+image:doc/ha-added-sensor-w-first-values.png[Home Assistant Added Sensor with First Values]
 
 == Software
 
@@ -77,8 +88,8 @@ The software uses two main interfaces:
 1. **Sensor Interface**: Implemented by all sensor classes. Defines methods for initialization and data retrieval. Adding a new sensor involves creating a class that implements this interface.
 2. **Publisher Interface**: Implemented by classes responsible for publishing data (e.g., MQTT). Defines methods for connecting to servers and sending data.
 
-=== Implemented Sensors
-* **DhtSensor**: Supports DHT11 and DHT22 sensors using the Adafruit DHT library.
+=== Implemented Sensor-types
+* **Misto**: Supports DHT11 and DHT22 sensors using the Adafruit DHT library.
 * **Hx711Sensor**: Supports HX711 weight-scale sensors.
 
 === Implemented Publishers
@@ -132,12 +143,11 @@ The PCB is designed for the 'Misto' sensor and uses ESP8266 and a DHT11/DHT22 se
 image:doc/hardware.jpg[ESP8266 PCB without enclosure]
 
 === Sensorwebben ApiScale PCB
-The PCB is designed for DHT11/DHT22 sensors and includes connectors for:
+The PCB is designed for DHT11/DHT22 and HX711 weight-scale sensors and includes optional footprints and connectors for:
 
-* I2C sensors.
-* Dallas one-wire sensors.
-* LiPo charger and batteries (optional).
-* HX711 weight-scale sensors.
+* I2C sensors
+* Dallas one-wire sensors
+* LiPo charger and batteries
 
 
 === Programming Interface

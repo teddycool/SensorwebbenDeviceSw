@@ -7,8 +7,7 @@ The sensor sends the message to the Homeassistant mqtt-broker to the following t
 
 home/sensor/sw_<devid>
 
-with the following format and value-content for each 'sensor' entity. Note that localip 
-and ssid not is a part of the configuration and will not show up as 'sensors' in Homeassistant.
+with the following format and value-content for each 'sensor' entity. 
 
 [source,json]
 ----
