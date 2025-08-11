@@ -2,15 +2,12 @@
 #define DISCOVERYCLIENT_H
 
 #include <Arduino.h>
+#include "Publisher.h"
 
-class Publisher {
+class DiscoveryClient
+{
 public:
-    virtual void publish(const String& topic, const String& message, bool retain) = 0;
-};
-
-class DiscoveryClient {
-public:
-    DiscoveryClient(Publisher& publisher, const String& chipid);
+    DiscoveryClient(Publisher &publisher, const String &chipid);
 
     void sendWifitries();
     void sendBattery();
@@ -21,9 +18,12 @@ public:
     void sendChipid();
     void sendCalfactor();
     void sendRawWeight();
+    void sendTemperature();
+    void sendHumidity();
+    void sendMqttTries();
 
 private:
-    Publisher& publisher_;
+    Publisher &publisher_;
     String chipid_;
 };
 

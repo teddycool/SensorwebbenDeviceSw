@@ -2,7 +2,8 @@
 #include "DiscoveryMsg.h"
 
 DiscoveryClient::DiscoveryClient(Publisher& publisher, const String& chipid)
-    : publisher_(publisher), chipid_(chipid) {}
+    : publisher_(publisher), chipid_(chipid)
+{}
 
 void DiscoveryClient::sendWifitries() {
     String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "wifitries", "");
@@ -23,7 +24,7 @@ void DiscoveryClient::sendSignalStrength() {
 }
 
 void DiscoveryClient::sendAbat() {
-    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "abat", "");
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "abat", "none");
     String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "abat");
     publisher_.publish(topic, msg, true);
 }
@@ -47,13 +48,31 @@ void DiscoveryClient::sendChipid() {
 }
 
 void DiscoveryClient::sendCalfactor() {
-    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "calfactor", "");
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "calfactor", "none");
     String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "calfactor");
     publisher_.publish(topic, msg, true);
 }
 
 void DiscoveryClient::sendRawWeight() {
-    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "rweight", "");
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "rweight", "none");
     String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "rweight");
+    publisher_.publish(topic, msg, true);
+}
+
+void DiscoveryClient::sendTemperature() {
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "temperature", "temperature", "°C");
+    String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "temperature");
+    publisher_.publish(topic, msg, true);
+}
+
+void DiscoveryClient::sendHumidity() {
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "humidity", "humidity", "%");
+    String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "humidity");
+    publisher_.publish(topic, msg, true);
+}
+
+void DiscoveryClient::sendMqttTries() {
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "mqtttries", "none");
+    String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "mqtttries");
     publisher_.publish(topic, msg, true);
 }

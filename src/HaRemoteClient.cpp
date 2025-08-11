@@ -5,15 +5,20 @@
  * testautomation.yaml file.
  */
 #include "HaRemoteClient.h"
-#include "boxsecrets.h"
 #include <WiFiClientSecure.h>
-
 #include <Arduino.h>
 
 WiFiClientSecure client;
 
-bool publish(const String &topic, const String &payload, bool retain)
-{    
+void HaRemoteClient::initialize(const String& chipId, const String& mqtt_server, int mqtt_port, const String& mqtt_user, const String& mqtt_pw) {
+    chipId_ = chipId;
+    mqtt_server_ = mqtt_server;
+    mqtt_port_ = mqtt_port;
+    mqtt_user_ = mqtt_user;
+    mqtt_pw_ = mqtt_pw;
+}
+
+bool HaRemoteClient::publish(const String &topic, const String &payload, bool retain) {
     client.setInsecure(); // Disable certificate validation for simplicity
     String message = createMessage(topic, payload, retain);
     Serial.println("Message: " + message);
@@ -72,10 +77,9 @@ bool publish(const String &topic, const String &payload, bool retain)
     return true;
 }
 
-String createMessage(const String &topic, const String &payload, bool retain)
-{
+String HaRemoteClient::createMessage(const String &topic, const String &payload, bool retain) {
     String message = "{";
-    message += "\"topic\":\"" + topic + "\"" + ",";
+    message += "\"topic\":\"" + topic + "\",";
     message += "\"payload\":" + payload + ",";
     message += "\"retain\":" + String(retain);
     message += "}";

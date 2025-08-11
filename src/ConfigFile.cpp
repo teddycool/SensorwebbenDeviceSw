@@ -1,6 +1,9 @@
 #include "ConfigFile.h"
+#include <ArduinoJson.h>
+#include <LittleFS.h>
+#include <FS.h>
 
-bool ConfigFile::writeToFile(const char *filename, const ArduinoJson::V741PB22::JsonDocument &json)
+bool ConfigFile::writeToFile(const char *filename, const JsonDocument &json)
 {
     if (!LittleFS.begin())
     {
@@ -27,7 +30,7 @@ bool ConfigFile::writeToFile(const char *filename, const ArduinoJson::V741PB22::
     return true;
 }
 
-bool ConfigFile::readFromFile(const char *filename, ArduinoJson::V741PB22::JsonDocument &json)
+bool ConfigFile::readFromFile(const char *filename, JsonDocument &json)
 {
     if (!LittleFS.begin())
     {

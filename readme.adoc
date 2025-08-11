@@ -4,9 +4,9 @@
 
 = Sensorwebben Software Documentation
 
-This repository contains the software for sensor devices developed by Sensorwebben.se. The software is designed to run on ESP8266 or ESP32 microcontrollers, enabling communication with Home Assistant via MQTT or Nabu Casa web-hooks.
+This repository contains the software for sensor devices developed by Sensorwebben.se. The software is designed to run on ESP8266 or ESP32 microcontrollers, enabling communication with Home Assistant via local MQTT or remote Nabu Casa web-hooks.
 
-Pre-built hardware will soon be available for purchase on the Sensorwebben.se website but circuit-diagrams will also soon available in this repository for those who want to build their own devices.
+Pre-built hardware is available for purchase on the Sensorwebben.se website but circuit-diagrams will also soon available in this repository for those who want to build their own devices.
 
 
 == Overview
@@ -16,7 +16,7 @@ The software supports:
 * Interfacing with sensors like DHT11, DHT22, and HX711 (weight-scale).
 * Local communication with Home Assistant via MQTT.
 * Remote communication with Home Assistant via Nabu Casa web-hooks and MQTT trigger automation.
-* Configuration and testing of new hardware using setup software.
+* Configuration and testing of new hardware using a setup software.
 
 The software is built using the PlatformIO build system and the Arduino framework, making it modular and extensible for adding new sensors and features.
 
@@ -29,7 +29,7 @@ The software is divided into four main configurations for each microcontroller (
 3. **setup-local**: For testing and configuring new hardware with local communication.
 4. **setup-remote**: For testing and configuring new hardware with remote communication.
 
-In the future, the setup-local and setup-remote configurations will be merged into a single setup software.
+In the future, the local and remote configurations will be merged into a single software.
 
 == Features
 
@@ -121,17 +121,17 @@ Replace `<environment>` with the desired environment name from above.
 
 == Hardware
 
-=== ESP8266 PCB
-The PCB is designed for DHT11/DHT22 sensors and includes connectors for:
+=== Sensorwebben Misto PCB
+The PCB is designed for the 'Misto' sensor and uses ESP8266 and a DHT11/DHT22 sensor but includes optional footprints and connectors for:
 
-* I2C sensors.
-* Dallas one-wire sensors.
-* HSM circuits (via I2C).
-* LiPo charger and batteries (optional).
+* I2C sensors
+* Dallas one-wire sensors
+* HSM circuits (via I2C) 
+* LiPo charger and batteries
 
 image:doc/hardware.jpg[ESP8266 PCB without enclosure]
 
-=== ESP32 PCB
+=== Sensorwebben ApiScale PCB
 The PCB is designed for DHT11/DHT22 sensors and includes connectors for:
 
 * I2C sensors.

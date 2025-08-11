@@ -1,7 +1,7 @@
 /******************************************************************************
  * By teddycool,
  * https://github.com/teddycool/
- * This project contains the software for a sensor-device built around ESP8266.
+ * This project contains the software for sensor-device 'Misto' built around ESP8266.
  * The software and the sensor-circuit-diagram are released under GPL-3.0
  * Pre-built hardware is sold by www.sensorwebben.se and www.biwebben.se
  * The sw makes heavy use of https://github.com/tzapu/WiFiManager for
@@ -39,25 +39,25 @@
  * OTA is enabled but not yet working fully, sorry...
  */
 #define CHIPTYPE ESP8266 // Define the chip type as ESP8266
-#include <LittleFS.h> // Use LittleFS instead of SPIFFS
+#include <LittleFS.h>
 #include <ESP8266WiFi.h>
 #include "Esp8266Config.h"
 #include <DNSServer.h>
-#include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
-#include <ArduinoJson.h> // https://github.com/bblanchon/ArduinoJson
+#include <WiFiManager.h>
+#include <ArduinoJson.h>
 #include "DiscoveryMsg.h"
 #include "DhtSensor.h"
 #include "MqttPublisher.h"
-#include "LedBlinker.h"
-#include "boxsecrets.h" // WiFi credentials and MQTT settings for remote connection
+#include "HaRemoteClient.h"
 #include "DiscoveryClient.h"
+#include "LedBlinker.h"
+#include "boxsecrets.h"
 
 WiFiServer server(80);
 
 int64_t sleeptimer;
 
 // Parameters to measure
-
 String ssid;
 int wifitries;
 String rssi;
@@ -66,21 +66,19 @@ int abat;
 float vbat;
 float calfactor;
 
-char *mqtt_server;
-char *mqtt_port;
-char *mqtt_user;
-char *mqtt_pw;
-char *mqtt_ptopic;
-char *mqtt_dtopic;
-char *cchipid;
+char *mqtt_server = nullptr;
+char *mqtt_port = nullptr;
+char *mqtt_user = nullptr;
+char *mqtt_pw = nullptr;
+char *mqtt_ptopic = nullptr;
+char *cchipid = nullptr;
 
 String chipid;
 LedBlinker ledBlinker(LEDPIN); // LED blinker for status indication
 
-// flag for saving data
 bool shouldSaveConfig = false;
 
-// callback notifying us of the need to save config
+
 void saveConfigCallback()
 {
   Serial.println("Should save config");
@@ -109,6 +107,13 @@ void setup()
   pinMode(PWRPIN, OUTPUT);
   pinMode(LEDPIN, OUTPUT);
 
+  // Allocate memory for MQTT credentials
+  mqtt_server = new char[40]();
+  mqtt_port = new char[6]();
+  mqtt_user = new char[20]();
+  mqtt_pw = new char[20]();
+  mqtt_ptopic = new char[50]();
+
   if ((MQTT_LOCAL == true) && (digitalRead(MODEPIN) == HIGH))
   {
     Serial.println("MQTT_LOCAL is set to true and config-mode selected");
@@ -121,41 +126,39 @@ void setup()
       Serial.println("Mounted file system");
       if (LittleFS.exists("/config.json"))
       {
-        // file exists, reading and loading
         Serial.println("Reading config file");
         File configFile = LittleFS.open("/config.json", "r");
         size_t size = configFile.size();
         Serial.println("Config file size: " + String(size));
         if (size > 0)
         {
-          // Allocate a buffer to store contents of the file.
           std::unique_ptr<char[]> buf(new char[size]);
           configFile.readBytes(buf.get(), size);
-          JsonDocument json;
+          DynamicJsonDocument json(2048);
           auto deserializeError = deserializeJson(json, buf.get());
           Serial.println("Deserialization done");
-          Serial.println("Config-file json: " + json);
+          serializeJson(json, Serial);
+          Serial.println();
 
           if (!deserializeError)
           {
             Serial.println("Parsed json");
-            strcpy(mqtt_server, json["mqtt_server"]);
-            strcpy(mqtt_port, json["mqtt_port"]);
-            strcpy(mqtt_user, json["mqtt_user"]);
-            strcpy(mqtt_pw, json["mqtt_pw"]);
-            strcpy(mqtt_ptopic, json["mqtt_ptopic"]);
-            strcpy(mqtt_dtopic, json["mqtt_dtopic"]);
-            calfactor = json["calfactor"].as<float>();
-            sleeptimer = json["sleeptime"].as<int64_t>();
+            strcpy(mqtt_server, json["mqtt_server"] | "");
+            strcpy(mqtt_port, json["mqtt_port"] | "");
+            strcpy(mqtt_user, json["mqtt_user"] | "");
+            strcpy(mqtt_pw, json["mqtt_pw"] | "");
+            strcpy(mqtt_ptopic, json["mqtt_ptopic"] | "");
+            calfactor = json["calfactor"] | 1.0f;
+            sleeptimer = json["sleeptime"] | 0;
           }
           else
           {
-            Serial.println("Failed to load json config. Using defult values.");
+            Serial.println("Failed to load json config. Using default values.");
           }
         }
         else
         {
-          Serial.println("Config-file was empty. Using defult values ");
+          Serial.println("Config-file was empty. Using default values ");
           String ptopic = "home/sensor/sw_" + chipid;
           strcpy(mqtt_ptopic, ptopic.c_str());
         }
@@ -166,9 +169,7 @@ void setup()
     {
       Serial.println("Failed to mount FS");
     }
-    // end read
 
-    // Setting
     if (strlen(mqtt_ptopic) < 2)
     {
       Serial.println("Setting default mqtt topic");
@@ -186,47 +187,35 @@ void setup()
     WiFiManagerParameter custom_mqtt_pw("pw", "mqtt server pw", mqtt_pw, 20);
 
     char sleeptimerStr[8];
-    snprintf(sleeptimerStr, sizeof(sleeptimerStr), "%lld", sleeptimer);    
+    snprintf(sleeptimerStr, sizeof(sleeptimerStr), "%lld", sleeptimer);
     WiFiManagerParameter custom_sleeptime("sleeptimer", "sleeptime in min", sleeptimerStr, 5);
     WiFiManagerParameter advanced_set_hd("<h2>Advanced config</h2>");
     WiFiManagerParameter advanced_set_text("<p>Don't touch when using Homeassistant default values!</p>");
     WiFiManagerParameter custom_mqtt_ptopic("ptopic", "mqtt publish-topic", mqtt_ptopic, 50);
-    //  WiFiManagerParameter custom_mqtt_dtopic("ctopic", "mqtt configuration-topic", mqtt_dtopic, 50);
 
-    //
     wifiManager.addParameter(&custom_mqtt_server);
     wifiManager.addParameter(&custom_mqtt_port);
     wifiManager.addParameter(&custom_mqtt_user);
     wifiManager.addParameter(&custom_mqtt_pw);
     wifiManager.addParameter(&custom_sleeptime);
-
     wifiManager.addParameter(&advanced_set_hd);
     wifiManager.addParameter(&advanced_set_text);
     wifiManager.addParameter(&custom_mqtt_ptopic);
-    //   wifiManager.addParameter(&custom_mqtt_dtopic);
 
-    // set config save notify callback
     wifiManager.setSaveConfigCallback(saveConfigCallback);
 
     char apname[chipid.length() + 1];
-    for (int x = 0; x < chipid.length(); x++)
-    {
-      apname[x] = chipid[x];
-    }
-    apname[chipid.length()] = '\0';
+    chipid.toCharArray(apname, chipid.length() + 1);
 
-    // and go into a blocking loop awaiting configuration
     wifiManager.startConfigPortal(apname);
 
     Serial.println("Connected !");
 
-    // read updated parameters from portal
     strcpy(mqtt_server, custom_mqtt_server.getValue());
     strcpy(mqtt_port, custom_mqtt_port.getValue());
     strcpy(mqtt_user, custom_mqtt_user.getValue());
     strcpy(mqtt_pw, custom_mqtt_pw.getValue());
     strcpy(mqtt_ptopic, custom_mqtt_ptopic.getValue());
-    //   strcpy(mqtt_dtopic, custom_mqtt_dtopic.getValue());
     sleeptimer = atoll(custom_sleeptime.getValue());
 
     Serial.println("The values in the file are: ");
@@ -235,19 +224,15 @@ void setup()
     Serial.println("\tmqtt_user : " + String(mqtt_user));
     Serial.println("\tmqtt_pw : " + String(mqtt_pw));
     Serial.println("\tsleeptime : " + String(sleeptimer));
-
     Serial.println("\tmqtt_ptopic : " + String(mqtt_ptopic));
-    Serial.println("\tmqtt_dtopic : " + String(mqtt_dtopic));
-
     Serial.println("Saving config");
 
-    JsonDocument json;
+    DynamicJsonDocument json(1024);
     json["mqtt_server"] = mqtt_server;
     json["mqtt_port"] = mqtt_port;
     json["mqtt_user"] = mqtt_user;
     json["mqtt_pw"] = mqtt_pw;
     json["mqtt_ptopic"] = mqtt_ptopic;
-    json["mqtt_dtopic"] = mqtt_dtopic;
     json["sleeptime"] = sleeptimer;
     json["calfactor"] = calfactor;
 
@@ -258,8 +243,7 @@ void setup()
     }
     else
     {
-      Serial.println("Succeded to open config file for writing");
-      //  serializeJson(json, Serial);
+      Serial.println("Succeeded to open config file for writing");
       serializeJson(json, configFile);
       Serial.println("Serialization of config to file done");
     }
@@ -267,8 +251,8 @@ void setup()
 
     bool connected = wifiManager.autoConnect();
     if (!connected)
-    {      Serial.println("Failed to connect to wifi and hit timeout");
-      
+    {
+      Serial.println("Failed to connect to wifi and hit timeout");
     }
     WiFi.mode(WIFI_STA);
     WiFi.begin();
@@ -278,7 +262,7 @@ void setup()
     {
       wifitries++;
       delay(backoffDelay);
-      backoffDelay *= 2; // Exponential backoff
+      backoffDelay *= 2;
     }
 
     if (WiFi.status() == WL_CONNECTED)
@@ -288,11 +272,8 @@ void setup()
       Serial.println("Signal strength: " + String(WiFi.RSSI()) + " dBm");
       Serial.println("WiFi SSID: " + String(WiFi.SSID()));
       Serial.println("Starting to send config messages..");
-
       MqttPublisher pubClient;
       pubClient.initialize(chipid, mqtt_server, atoi(mqtt_port), mqtt_user, mqtt_pw);
-
-      // Use DiscoverySession for all discovery/config messages
       DiscoveryClient dclient(pubClient, chipid);
 
       dclient.sendTemperature();
@@ -314,8 +295,6 @@ void setup()
       }
     }
 
-    // save the custom parameters to FS
-
     Serial.println("WiFi setup and config- parameters are ready!");
     Serial.println("Waiting for user to change mode-switch and press reset");
     while (true)
@@ -335,14 +314,9 @@ void setup()
 void loop()
 {
   WiFi.mode(WIFI_STA);
-  if (!MQTT_LOCAL)
-  {
-    WiFi.begin(cssid, cpassword);
-  }
-  else
-  {
-    WiFi.begin();
-  }
+
+  WiFi.begin();
+
   Serial.println("Connecting");
 
   wifitries = 1;
@@ -356,13 +330,9 @@ void loop()
   Serial.println("Setting up power to sensors...");
   digitalWrite(PWRPIN, HIGH);
   delay(1000);
-  // Measure cycle starts here
 
   if (WiFi.status() == WL_CONNECTED)
   {
-    //***********************
-    // Connection and info state
-    //***********************
     Serial.println("Setting up power to sensors...");
     digitalWrite(PWRPIN, HIGH);
 
@@ -374,7 +344,6 @@ void loop()
     Serial.println("Connected to SSID: " + ssid);
     Serial.println("Signal strength: " + rssi);
 
-    // Allocate a static JsonDocument and start adding data to mqttpayload
     StaticJsonDocument<1024> mqttpayload;
     mqttpayload["chipid"] = chipid;
     mqttpayload["rssi"] = rssi;
@@ -388,12 +357,12 @@ void loop()
 
     if (LittleFS.begin())
     {
-      cchipid = new char[10];
-      mqtt_server = new char[40];
-      mqtt_user = new char[20];
-      mqtt_pw = new char[20];
-      mqtt_ptopic = new char[50];
-      mqtt_dtopic = new char[50];
+      cchipid = new char[10]();
+      mqtt_server = new char[40]();
+      mqtt_port = new char[6]();
+      mqtt_user = new char[20]();
+      mqtt_pw = new char[20]();
+      mqtt_ptopic = new char[50]();
       Serial.println("Filesystem mounted");
       Serial.println("Reading config file");
       File configFile = LittleFS.open("/config.json", "r");
@@ -409,13 +378,13 @@ void loop()
         Serial.println("Config file size: " + String(size));
         if (size > 0)
         {
-          // Allocate a buffer to store contents of the file.
           std::unique_ptr<char[]> buf(new char[size]);
           configFile.readBytes(buf.get(), size);
           DynamicJsonDocument json(2048);
           Serial.println("Bytes read: " + String(size));
           auto deserializeError = deserializeJson(json, buf.get());
           serializeJson(json, Serial);
+          Serial.println();
 
           if (!deserializeError)
           {
@@ -423,22 +392,21 @@ void loop()
             Serial.println("Parsed json:");
             Serial.println("The values in the file are: ");
 
-            strcpy(cchipid, json["chipid"]);
+            strcpy(cchipid, json["chipid"] | "");
             Serial.println("\tchipid from file : " + String(cchipid));
-            strcpy(mqtt_server, json["mqtt_server"]);
+            strcpy(mqtt_server, json["mqtt_server"] | "");
             Serial.println("\tmqtt_server : " + String(mqtt_server));
-            strcpy(mqtt_user, json["mqtt_user"]);
+            strcpy(mqtt_user, json["mqtt_user"] | "");
             Serial.println("\tmqtt_user : " + String(mqtt_user));
-            strcpy(mqtt_pw, json["mqtt_pw"]);
+            strcpy(mqtt_pw, json["mqtt_pw"] | "");
             Serial.println("\tmqtt_pw : " + String(mqtt_pw));
-            strcpy(mqtt_ptopic, json["mqtt_ptopic"]);
+            strcpy(mqtt_ptopic, json["mqtt_ptopic"] | "");
             Serial.println("\tmqtt_ptopic : " + String(mqtt_ptopic));
-            strcpy(mqtt_dtopic, json["mqtt_dtopic"]);
-            Serial.println("\tmqtt_dtopic : " + String(mqtt_dtopic));
-            uint64_t port = json["mqtt_port"].as<uint64_t>();
-            sleeptimer = json["sleeptime"].as<int64_t>();
+            strcpy(mqtt_port, String(json["mqtt_port"] | "1883").c_str());
+            Serial.println("\tmqtt_port : " + String(mqtt_port));
+            sleeptimer = json["sleeptime"] | 0;
             Serial.println("\tsleeptime : " + String(sleeptimer));
-            calfactor = json["calfactor"].as<float>();
+            calfactor = json["calfactor"] | 1.0f;
             Serial.println("\tcalfactor : " + String(calfactor));
 
             Serial.println("Reading battery voltage on A0...");
@@ -458,15 +426,16 @@ void loop()
             serializeJson(mqttpayload, Serial);
             Serial.println();
             Serial.println("MQTT message topic: " + String(mqtt_ptopic));
-            Publisher *pubClient = nullptr;
-            Serial.println("Publisher created!");
-            Serial.println("MQTT_LOCAL is set to false");
-            Serial.println("MQTT connection will be done via Nabu Casa web-hook");
-            pubClient = new HaRemoteClient();
-            bool mqttsuccess = pubClient->publish(mqtt_ptopic, mqttpayload.as<String>(), false);
+            MqttPublisher pubClient;
+            pubClient.initialize(chipid, mqtt_server, atoi(mqtt_port), mqtt_user, mqtt_pw);
+            DiscoveryClient dclient(pubClient, chipid);
+
+            String payload;
+            serializeJson(mqttpayload, payload);
+            bool mqttsuccess = pubClient.publish(String(mqtt_ptopic).c_str(), payload.c_str(), false);
             if (mqttsuccess)
             {
-              Serial.println("MQTT message published with remote client!");
+              Serial.println("MQTT message published!");
             }
             else
             {
@@ -474,8 +443,6 @@ void loop()
               Serial.println("Blink mqtt-error (3)");
               ledBlinker.ledBlink(500, 500, 3);
             }
-            delete pubClient;
-            Serial.println("Publisher deleted!");
           }
         }
         else
@@ -497,7 +464,6 @@ void loop()
 
     LittleFS.end();
   }
-
   else
   {
     Serial.println("WiFi connection failed!");
@@ -522,5 +488,5 @@ void loop()
     Serial.println("Will sleep for " + String(sleeptimer) + " minutes...");
   }
   Serial.println("Going to sleep again....");
-  ESP.deepSleep(micros); // uS!
+  ESP.deepSleep(micros);
 }
