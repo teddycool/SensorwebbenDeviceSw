@@ -74,10 +74,10 @@ The red LED blinks to indicate errors:
 === Messaging
 The device sends two types of messages to Home Assistant:
 
-1. **Discovery Messages**: Sent during setup to configure the sensor in Home Assistant.
-2. **Publish Messages**: Sent during normal operation to report sensor data.    
+1. **Discovery Messages**: Sent during setup to configure the sensor as a 'device' in Home Assistant.
+2. **Publish Messages**: Sent during normal operation to report data from the sensors 'entities'.
 
-When configured, the sensor values shows up directly in Home Assistant default view.
+When configured correctly from the webportal of the sensor-device, the sensor values shows up directly in Home Assistant default view and could be used in dashboards immediately.
 
 image:doc/ha-added-sensor-w-first-values.png[Home Assistant Added Sensor with First Values]
 
@@ -89,8 +89,8 @@ The software uses two main interfaces:
 2. **Publisher Interface**: Implemented by classes responsible for publishing data (e.g., MQTT). Defines methods for connecting to servers and sending data.
 
 === Implemented Sensor-types
-* **Misto**: Supports DHT11 and DHT22 sensors using the Adafruit DHT library.
-* **Hx711Sensor**: Supports HX711 weight-scale sensors.
+*  **DHT11/DHT22**: Supports DHT11/DHT22 sensors using the Adafruit DHT library.
+*  **Hx711**: Supports HX711 weight-scale sensors
 
 === Implemented Publishers
 * **MqttPublisher**: Publishes data to a local MQTT server.
@@ -154,7 +154,7 @@ The PCB is designed for DHT11/DHT22 and HX711 weight-scale sensors and includes 
 Both the ESP8266 and ESP32 PCB has a 5-pin programming interface with the same 'pinning'. The pinout is as follows and the picture shows the ESP8266 variant
 
 1. **+3V3**: Use only without batteries installed.
-2. **GND**
+2. **GND**: Connect to the programmer's GND pin.
 3. **TX**: Connect to the programmer's TX pin.
 4. **RX**: Connect to the programmer's RX pin.
 5. **PGM**: Connect to GND for programming mode before flashing firmware.
