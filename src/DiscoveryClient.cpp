@@ -13,7 +13,7 @@ void DiscoveryClient::sendWifitries() {
 }
 
 void DiscoveryClient::sendBattery() {
-    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "voltage", "battery", "V");
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "voltage", "battery", "V", 2);
     String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "battery");
     mqttPublisher_.publish(topic, msg, true);
 }
@@ -61,7 +61,7 @@ void DiscoveryClient::sendRawWeight() {
 }
 
 void DiscoveryClient::sendTemperature() {
-    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "temperature", "temperature", "°C");
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "temperature", "temperature", "°C",1);
     String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "temperature");
     mqttPublisher_.publish(topic, msg, true);
 }

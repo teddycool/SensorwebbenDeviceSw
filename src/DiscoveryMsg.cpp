@@ -23,7 +23,7 @@
 
 
 // Create a serialized JSON string
-String DiscoveryMsg::createDiscoveryMsg(const String &deviceid, const String &dclass, const String &vname, const String &unit)
+String DiscoveryMsg::createDiscoveryMsg(const String &deviceid, const String &dclass, const String &vname, const String &unit, int prec)
 {
     String firmware = String(SWVERSION) + " " + String(COMTYPE);
 
@@ -39,6 +39,10 @@ String DiscoveryMsg::createDiscoveryMsg(const String &deviceid, const String &dc
     {
         mqttconfigmsg["device_class"] = dclass;
     }
+    
+    // Set the number of decimals (precision) for Home Assistant
+    if (prec > 0)
+        mqttconfigmsg["suggested_display_precision"] = prec;
 
     mqttconfigmsg["value_template"] = "{{ value_json." + vname + " }}";
     mqttconfigmsg["unique_id"] = "sw_" + deviceid + "_" + vname;

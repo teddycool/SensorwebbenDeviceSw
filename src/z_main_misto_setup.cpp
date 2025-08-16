@@ -177,7 +177,7 @@ void loop()
     Serial.println("MQTT-payload: " + payload);
     WiFiClient wifiClient;
     MqttPublisher pubClient = MqttPublisher(wifiClient);
-    pubClient.initialize(chipid, local_mqtt_server, 1883, local_mqtt_user, local_mqtt_pw);
+    pubClient.initialize(chipid, local_mqtt_server, local_mqtt_port, local_mqtt_user, local_mqtt_pw);
     pubClient.publish(mqtt_ptopic.c_str(), payload.c_str(), false);
 
     Serial.println("End measuring cycle");
@@ -185,7 +185,7 @@ void loop()
     digitalWrite(LEDPIN, LOW);
     digitalWrite(PWRPIN, LOW);
 
-    Serial.println("Will now sleep for 100 seconds before next cycle ");
+    Serial.println("Will now sleep for 10 seconds before next cycle ");
     // ESP.deepSleep(10000000); // uS!
-    delay(100000); // 100 seconds
+    delay(10000); // 10 seconds
 }

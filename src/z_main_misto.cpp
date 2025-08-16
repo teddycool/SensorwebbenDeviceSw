@@ -144,7 +144,7 @@ void setup()
           {
             Serial.println("Parsed json");
             strcpy(mqtt_server, json["mqtt_server"] | "");
-            strcpy(mqtt_port, json["mqtt_port"] | "");
+            strcpy(mqtt_port, json["mqtt_port"] | "1883");
             strcpy(mqtt_user, json["mqtt_user"] | "");
             strcpy(mqtt_pw, json["mqtt_pw"] | "");
             strcpy(mqtt_ptopic, json["mqtt_ptopic"] | "");

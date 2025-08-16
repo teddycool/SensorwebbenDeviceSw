@@ -1,4 +1,3 @@
-
 #ifndef DISCOVERYMSG_H
 #define DISCOVERYMSG_H
 
@@ -15,10 +14,9 @@
 
 class DiscoveryMsg {
 public:
-    
     // Method to create a serialized JSON string
-   static  String createDiscoveryMsg(const String& deviceid, const String& dclass, 
-        const String& vname, const String& unit);
+    static String createDiscoveryMsg(const String& deviceid, const String& dclass, 
+        const String& vname, const String& unit, int prec = 0);
 
     // Method to create a discovery message topic
     static String createDiscoveryMsgTopic(const String& deviceid, const String& vname);

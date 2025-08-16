@@ -3,11 +3,12 @@
 #ifndef ESP8266CONFIG_H     
 #define ESP8266CONFIG_H
 
+#define DHTTYPE 11 // DHT 11 or 22 (AM2302)
 
 #define SWVERSION "V3.0.0"
 #define COMTYPE "Local MQTT"
 #define HWVERSION "V5.0 ESP8266"
-#define SENSORMODEL "Sensor Model Misto"
+#define SENSORMODEL "Sensor Model Misto DHT" + String(DHTTYPE)
 
 // In some hw versions of esp8266 these pin-no are reversed sw-hw pin ie io5 -> pin-io4!
 #define DHTPIN 5
@@ -15,9 +16,9 @@
 #define LEDPIN 15
 #define PWRPIN 13
 
-#define DHTTYPE 22 // DHT 11 or 22 (AM2302)
 
-#define TEST_VOLTAGE 4.5
+
+#define TEST_VOLTAGE 3.5
 
 #define MQTT_LOCAL true // true = local mqtt broker (default), false = remote mqtt connection via Nabu Casa web-hook
 #define WIFI_MAX_TRIES 10 // Number of tries to connect to wifi

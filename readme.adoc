@@ -2,14 +2,11 @@
 :toc-title: Table of Contents
 :toc-placement: preamble
 
-= Sensorwebben Software Documentation
+= Sensorwebben Device Documentation
 
 This repository contains the software for sensor devices developed by Sensorwebben.se. The software is designed to run on ESP8266 or ESP32 microcontrollers, enabling communication with Home Assistant via local MQTT or remote Nabu Casa web-hooks.
 
-Pre-built hardware is available for purchase on the Sensorwebben.se website but circuit-diagrams will also soon available in this repository for those who want to build their own devices.
-
-
-
+Pre-built hardware is available for purchase on the Sensorwebben.se website but the information in this repository can also be used for building your own device.
 
 == Overview
 
