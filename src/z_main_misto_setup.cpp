@@ -140,10 +140,10 @@ void loop()
     // Create JSON document for settings
     DynamicJsonDocument json(2048);
     json["chipid"] = chipid;
-    json["mqtt_server"] = local_mqtt_server;
-    json["mqtt_port"] = local_mqtt_port;
-    json["mqtt_user"] = local_mqtt_user;
-    json["mqtt_pw"] = local_mqtt_pw;
+    json["mqtt_server"] = "";
+    json["mqtt_port"] = "";
+    json["mqtt_user"] = "";
+    json["mqtt_pw"] = "";
     json["mqtt_ptopic"] = mqtt_ptopic;
     json["sleeptime"] = DEFAULT_SLEEP_TIME;
     json["calfactor"] = calfactor;

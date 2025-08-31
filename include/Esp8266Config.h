@@ -3,7 +3,7 @@
 #ifndef ESP8266CONFIG_H     
 #define ESP8266CONFIG_H
 
-#define DHTTYPE 11 // DHT 11 or 22 (AM2302)
+#define DHTTYPE 22 // DHT 11 or 22 (AM2302)
 
 #define SWVERSION "V3.0.0"
 #define COMTYPE "Local MQTT"

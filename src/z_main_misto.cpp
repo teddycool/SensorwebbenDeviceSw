@@ -39,9 +39,10 @@
  * OTA is enabled but not yet working fully, sorry...
  */
 #define CHIPTYPE ESP8266 // Define the chip type as ESP8266
+#include "Esp8266Config.h"
+
 #include <LittleFS.h>
 #include <ESP8266WiFi.h>
-#include "Esp8266Config.h"
 #include <DNSServer.h>
 #include <WiFiManager.h>
 #include <ArduinoJson.h>
