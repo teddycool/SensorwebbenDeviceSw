@@ -4,9 +4,11 @@
 
 = Sensorwebben Device Documentation
 
-This repository contains the software for sensor devices developed by Sensorwebben.se. The software is designed to run on ESP8266 or ESP32 microcontrollers, enabling communication with Home Assistant via local MQTT or remote Nabu Casa web-hooks.
+This repository contains the software for sensor devices developed by link:https://www.sensorwebben.se[Sensorwebben.se]. The software is designed to run on ESP8266 or ESP32 microcontrollers, enabling communication with Home Assistant via local MQTT or remote Nabu Casa web-hooks.
 
-Pre-built hardware is available for purchase on the Sensorwebben.se website but the information in this repository can also be used for building your own device.
+Pre-built hardware is available for purchase on link:https://www.sensorwebben.se[Sensorwebben.se] website but the information in this repository can also be used for building your own device or get inspired to other projects.
+
+If you have suggestions for improvements, please consider contributing via pull requests or opening issues.
 
 == Overview
 
@@ -40,8 +42,8 @@ In the future, the local and remote configurations will be merged into a single 
 == Prerequisites
 
 1. **WiFi Coverage**: Ensure the sensor device can connect to your WiFi network.
-2. **Home Assistant**: A working Home Assistant installation is required for automatic device discovery and integration.
-3. **MQTT Server**: Install and configure an MQTT server (e.g., Mosquitto) in your Home Assistant setup.
+2. **Home Assistant**: A working Home Assistant installation is required.
+3. **MQTT Server**: Install and configure an MQTT server (e.g., Mosquitto) in your Home Assistant setup for automatic device discovery and integration.
 
 For more details on Home Assistant, visit: link:https://www.home-assistant.io/[Home Assistant].
 
@@ -54,14 +56,14 @@ The sensor device operates in two modes, controlled by a switch.
 * **Local Software**: Creates an access point and web server for configuring WiFi, MQTT server, and other parameters.
 * **Remote Software**: Uses predefined parameters from `boxsecrets.cpp` for remote connection to Home Assistant via Nabu Casa.
 
-In both cases, the device sends configuration messages to Home Assistant, automatically setting up sensors and entities.
+In both cases, the device sends configuration messages to Home Assistant and automatically sets up sensors and entities.
 
 === 2. Standard Mode 
 * Connects to the configured WiFi and MQTT server.
 * Measures sensor data in cycles with deep sleep intervals.
 * Publishes data to Home Assistant.
 
-=== Error Indication
+==== Error Indication (in std mode)
 The red LED blinks to indicate errors:
 
 * **2 blinks**: WiFi connection failed.
@@ -103,7 +105,7 @@ The project is organized into several directories:
 * **src**: Contains the main source code for the project.
 * **include**: Contains header files for the project.
 * **lib**: Contains external libraries used in the project.
-* **test**: Contains unit tests for the project.
+* **test**: Contains unit tests for the project (not implemented yet).
 * **doc**: Contains documentation files for the project.
 * **README.md**: Contains the main documentation for the project.
 * **LICENSE**: Contains the license information for the project.
@@ -130,7 +132,7 @@ Replace `<environment>` with the desired environment name from above.
 == Hardware
 
 === Sensorwebben Misto PCB
-The PCB is designed for the 'Misto' sensor and uses ESP8266 and a DHT11/DHT22 sensor but includes optional footprints and connectors for:
+The PCB is designed for the link:https://www.sensorwebben.se/produkt-misto/['Misto'] sensor and uses ESP8266 and a DHT11/DHT22 sensor but includes optional footprints and connectors for:
 
 * I2C sensors
 * Dallas one-wire sensors
@@ -167,6 +169,8 @@ The circuit diagram for the ESP8266 sensor is included in the project: link:doc/
 * Merge local and remote real-software into a single configuration. This needs refactoring of the publisher-interface
 * Add support for more sensors and hardware features.
 * Provide additional design files for hardware.
+* Implement unit tests for the software components.
+* Design and implement more types of sensors
 
 == Additional Resources
 
