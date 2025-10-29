@@ -141,7 +141,7 @@ The PCB is designed for the link:https://www.sensorwebben.se/produkt-misto/['Mis
 
 image:doc/hw/misto_hardware.jpg[Misto PCB without enclosure]
 
-link:https://aisler.net/p/QNSKHTQ[Direct link to the shared PCB at Aisler.net]
+link:https://aisler.net/p/QNSKHTQB[Direct link to the shared PCB at Aisler.net]
 
 
 FreeCad design files for the Misto enclosure are included in the project: link:doc/hw/misto_enclosure_freecad.zip[Misto Enclosure FreeCad Project].
