@@ -185,7 +185,9 @@ void loop()
     digitalWrite(LEDPIN, LOW);
     digitalWrite(PWRPIN, LOW);
 
+    // TODO: add deep sleep here for testing of wake-up
     Serial.println("Will now sleep for 10 seconds before next cycle ");
     // ESP.deepSleep(10000000); // uS!
-    delay(10000); // 10 seconds
+    //delay(10000); // 10 seconds
+    ESP.deepSleep(10000000); // uS!
 }

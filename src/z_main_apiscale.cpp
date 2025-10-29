@@ -1,7 +1,7 @@
 /******************************************************************************
  * By teddycool,
  * https://github.com/teddycool/
- * This project contains the software for sensor-device 'Misto' built around ESP8266.
+ * This project contains the software for sensor-device 'ApiScale' built around ESP32.
  * The software and the sensor-circuit-diagram are released under GPL-3.0
  * Pre-built hardware is sold by www.sensorwebben.se and www.biwebben.se
  * The sw makes heavy use of https://github.com/tzapu/WiFiManager for
@@ -38,11 +38,11 @@
  * Currently only works with mqtt
  * OTA is enabled but not yet working fully, sorry...
  */
-#define CHIPTYPE ESP8266 // Define the chip type as ESP8266
-#include "Esp8266Config.h"
+#define CHIPTYPE ESP32 // Define the chip type as ESP32
 
 #include <LittleFS.h>
-#include <ESP8266WiFi.h>
+#include "Esp32Config.h"
+#include <WiFi.h>
 #include <DNSServer.h>
 #include <WiFiManager.h>
 #include <ArduinoJson.h>
@@ -53,6 +53,7 @@
 #include "DiscoveryClient.h"
 #include "LedBlinker.h"
 #include "boxsecrets.h"
+#include "WifiManagerParams.h"
 
 WiFiServer server(80);
 
@@ -178,30 +179,14 @@ void setup()
       strcpy(mqtt_ptopic, topic.c_str());
     }
 
-    WiFiManager wifiManager;
-
-    Serial.println("Setting up wifimanager parameters..");
-    // id/name, placeholder/prompt, default, length
-    WiFiManagerParameter custom_mqtt_server("server", "mqtt server", mqtt_server, 40);
-    WiFiManagerParameter custom_mqtt_port("port", "mqtt server port", mqtt_port, 6);
-    WiFiManagerParameter custom_mqtt_user("user", "mqtt server user", mqtt_user, 20);
-    WiFiManagerParameter custom_mqtt_pw("pw", "mqtt server pw", mqtt_pw, 20);
-
     char sleeptimerStr[8];
     snprintf(sleeptimerStr, sizeof(sleeptimerStr), "%lld", sleeptimer);
-    WiFiManagerParameter custom_sleeptime("sleeptimer", "sleeptime in min", sleeptimerStr, 5);
-    WiFiManagerParameter advanced_set_hd("<h2>Advanced config</h2>");
-    WiFiManagerParameter advanced_set_text("<p>Don't touch when using Homeassistant default values!</p>");
-    WiFiManagerParameter custom_mqtt_ptopic("ptopic", "mqtt publish-topic", mqtt_ptopic, 50);
 
-    wifiManager.addParameter(&custom_mqtt_server);
-    wifiManager.addParameter(&custom_mqtt_port);
-    wifiManager.addParameter(&custom_mqtt_user);
-    wifiManager.addParameter(&custom_mqtt_pw);
-    wifiManager.addParameter(&custom_sleeptime);
-    wifiManager.addParameter(&advanced_set_hd);
-    wifiManager.addParameter(&advanced_set_text);
-    wifiManager.addParameter(&custom_mqtt_ptopic);
+    WiFiManager wifiManager;
+    WifiManagerParams params = createWifiManagerParams(
+        mqtt_server, mqtt_port, mqtt_user, mqtt_pw, sleeptimerStr, mqtt_ptopic
+    );
+    addParamsToManager(wifiManager, params);
 
     wifiManager.setSaveConfigCallback(saveConfigCallback);
 
@@ -212,12 +197,13 @@ void setup()
 
     Serial.println("Connected !");
 
-    strcpy(mqtt_server, custom_mqtt_server.getValue());
-    strcpy(mqtt_port, custom_mqtt_port.getValue());
-    strcpy(mqtt_user, custom_mqtt_user.getValue());
-    strcpy(mqtt_pw, custom_mqtt_pw.getValue());
-    strcpy(mqtt_ptopic, custom_mqtt_ptopic.getValue());
-    sleeptimer = atoll(custom_sleeptime.getValue());
+    // After config portal, retrieve values:
+    strcpy(mqtt_server, params.mqtt_server->getValue());
+    strcpy(mqtt_port,   params.mqtt_port->getValue());
+    strcpy(mqtt_user,   params.mqtt_user->getValue());
+    strcpy(mqtt_pw,     params.mqtt_pw->getValue());
+    strcpy(mqtt_ptopic, params.mqtt_ptopic->getValue());
+    sleeptimer = atoll(params.sleeptime->getValue());
 
     Serial.println("The values in the file are: ");
     Serial.println("\tmqtt_server : " + String(mqtt_server));

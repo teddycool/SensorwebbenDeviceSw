@@ -4,11 +4,11 @@
 
 = Sensorwebben Device Documentation
 
-This repository contains the software for sensor devices developed by link:https://www.sensorwebben.se[Sensorwebben.se]. The software is designed to run on ESP8266 or ESP32 microcontrollers, enabling communication with Home Assistant via local MQTT or remote Nabu Casa web-hooks.
+This repository contains both the software for sensor-devices developed by link:https://www.sensorwebben.se[Sensorwebben.se] using ESP8266 or ESP32 microcontrollers but also their hardware designs (PCB layouts and circuit diagrams).
 
-Pre-built hardware is available for purchase on link:https://www.sensorwebben.se[Sensorwebben.se] website but the information in this repository can also be used for building your own device or get inspired to other projects.
+The software and hardware is open-source and can be used for building your own sensor-devices or get inspiration for other projects.
 
-If you have suggestions for improvements, please consider contributing via pull requests or opening issues.
+If you have suggestions for improvements, please consider contributing via pull-requests, opening an issue or contact me via pm or email.
 
 == Overview
 
@@ -131,7 +131,7 @@ Replace `<environment>` with the desired environment name from above.
 
 == Hardware
 
-=== Sensorwebben Misto PCB
+=== Sensorwebben Misto
 The PCB is designed for the link:https://www.sensorwebben.se/produkt-misto/['Misto'] sensor and uses ESP8266 and a DHT11/DHT22 sensor but includes optional footprints and connectors for:
 
 * I2C sensors
@@ -139,9 +139,14 @@ The PCB is designed for the link:https://www.sensorwebben.se/produkt-misto/['Mis
 * HSM circuits (via I2C) 
 * LiPo charger and batteries
 
-image:doc/hardware.jpg[ESP8266 PCB without enclosure]
+image:doc/hw/misto_hardware.jpg[Misto PCB without enclosure]
 
-=== Sensorwebben ApiScale PCB
+link:https://aisler.net/p/QNSKHTQ[Direct link to the shared PCB at Aisler.net]
+
+
+FreeCad design files for the Misto enclosure are included in the project: link:doc/hw/misto_enclosure_freecad.zip[Misto Enclosure FreeCad Project].
+
+=== Sensorwebben ApiScale
 The PCB is designed for DHT11/DHT22 and HX711 weight-scale sensors and includes optional footprints and connectors for:
 
 * I2C sensors
@@ -150,18 +155,18 @@ The PCB is designed for DHT11/DHT22 and HX711 weight-scale sensors and includes 
 
 
 === Programming Interface
-Both the ESP8266 and ESP32 PCB has a 5-pin programming interface with the same 'pinning'. The pinout is as follows and the picture shows the ESP8266 variant
+Both the ESP8266 and ESP32 PCB has a 5-pin programming interface with the same 'pinning'. The pinout is as follows and the picture shows the ESP8266 variant (left to right)
 
 1. **+3V3**: Use only without batteries installed.
 2. **GND**: Connect to the programmer's GND pin.
-3. **TX**: Connect to the programmer's TX pin.
-4. **RX**: Connect to the programmer's RX pin.
+3. **>TX**: Connect to the programmer's TX pin.
+4. **>RX**: Connect to the programmer's RX pin.
 5. **PGM**: Connect to GND for programming mode before flashing firmware.
 
 image:doc/programming-interface.jpg[ESP8266 Programming Interface]
 
 === Circuit Diagram
-The circuit diagram for the ESP8266 sensor is included in the project: link:doc/circuit.pdf[Circuit Diagram]. The circuit diagram for ESP32 will soon be available.
+The circuit diagram for the ESP8266 sensor is included in the project: link:doc/hw/misto_circuit.pdf[Circuit Diagram]. The circuit diagram for ESP32 will soon be available.
 
 == Future Plans
 
