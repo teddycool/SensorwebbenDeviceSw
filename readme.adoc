@@ -6,7 +6,13 @@
 
 This repository contains both the software for sensor-devices developed by link:https://www.sensorwebben.se[Sensorwebben.se] using ESP8266 or ESP32 microcontrollers but also their hardware designs (PCB layouts and circuit diagrams).
 
-The software and hardware is open-source and can be used for building your own sensor-devices or get inspiration for other projects.
+The software and hardware is open-source and the repo can be used for building your own sensor-devices or get inspiration for other projects. 
+
+I have used only open-source libraries and tools to make it easy to modify and extend the software without vendor lock-in or expensive licenses. 
+
+* Visual studio code with PlatformIO extension is used as development environment for the software.
+* KiCad is used for designing the hardware.
+* FreeCad is used for designing the enclosures.
 
 If you have suggestions for improvements, please consider contributing via pull-requests, opening an issue or contact me via pm or email.
 
@@ -141,10 +147,14 @@ The PCB is designed for the link:https://www.sensorwebben.se/produkt-misto/['Mis
 
 image:doc/hw/misto_hardware.jpg[Misto PCB without enclosure]
 
+==== Misto Circuit Diagram
+The circuit diagram for the ESP8266 sensor is included in the project: link:doc/hw/misto_circuit.pdf[Circuit Diagram]. 
+
+==== Misto PCB Design
 link:https://aisler.net/p/QNSKHTQB[Direct link to the shared PCB at Aisler.net]
 
-
-FreeCad design files for the Misto enclosure are included in the project: link:doc/hw/misto_enclosure_freecad.zip[Misto Enclosure FreeCad Project].
+==== Misto Enclosure Design
+FreeCad design files for the Misto enclosure will soon be available in the `doc/hw/enclosure` directory.
 
 === Sensorwebben ApiScale
 The PCB is designed for DHT11/DHT22 and HX711 weight-scale sensors and includes optional footprints and connectors for:
@@ -155,7 +165,7 @@ The PCB is designed for DHT11/DHT22 and HX711 weight-scale sensors and includes 
 
 
 === Programming Interface
-Both the ESP8266 and ESP32 PCB has a 5-pin programming interface with the same 'pinning'. The pinout is as follows and the picture shows the ESP8266 variant (left to right)
+All types of PCBs has a 5-pin programming interface with the same 'pinning'. The pinout is as follows and the picture shows the Misto variant (left to right)
 
 1. **+3V3**: Use only without batteries installed.
 2. **GND**: Connect to the programmer's GND pin.
@@ -163,19 +173,16 @@ Both the ESP8266 and ESP32 PCB has a 5-pin programming interface with the same '
 4. **>RX**: Connect to the programmer's RX pin.
 5. **PGM**: Connect to GND for programming mode before flashing firmware.
 
-image:doc/programming-interface.jpg[ESP8266 Programming Interface]
+image:doc/programming-interface.jpg[Misto Programming Interface]
 
-=== Circuit Diagram
-The circuit diagram for the ESP8266 sensor is included in the project: link:doc/hw/misto_circuit.pdf[Circuit Diagram]. The circuit diagram for ESP32 will soon be available.
 
-== Future Plans
 
-* Merge local and remote setup-software into a single configuration.
-* Merge local and remote real-software into a single configuration. This needs refactoring of the publisher-interface
-* Add support for more sensors and hardware features.
+== Future Plans (some)
+
 * Provide additional design files for hardware.
 * Implement unit tests for the software components.
-* Design and implement more types of sensors
+* Add support for more sensors and hardware features.
+* Design and implement more types of sensors-products
 
 == Additional Resources
 
