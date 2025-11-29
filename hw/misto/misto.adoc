@@ -108,7 +108,7 @@ Unfurthunatly Misto was designed before I started to use KiCad for all my hardwa
 === Hardware Design Files
 
 ==== Schematics
-* link:misto_sch.pdf[Misto Schematic (PDF)] 
+* link:misto_circuit.pdf[Misto Schematic (PDF)] 
 - Complete electrical schematic diagram
 
 ==== PCB Layout
@@ -116,7 +116,7 @@ Unfurthunatly Misto was designed before I started to use KiCad for all my hardwa
 * However, the PCB can be ordered from here: https://aisler.net/p/QNSKHTQB
 
 ==== Freecad Enclosure Design
-* link:misto_enclosure.zip[Misto Enclosure Design Files (ZIP)] 
+* link:mmisto-box-FreeCad.zip[Misto Enclosure Design Files (ZIP)] 
   - CAD source files for 3d printed enclosure
 
 
