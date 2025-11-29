@@ -6,24 +6,43 @@
 
 This repository contains both the software for sensor-devices developed by link:https://www.sensorwebben.se[Sensorwebben.se] using ESP8266 or ESP32 microcontrollers but also their hardware designs (PCB layouts and circuit diagrams).
 
-The software and hardware is open-source and the repo can be used for building your own sensor-devices or get inspiration for other projects. 
+The software and hardware are open-sourced and the repo can be used for building your own sensor-devices or get inspiration for other projects. 
 
-I have used only open-source libraries and tools to make it easy to modify and extend the software without vendor lock-in or expensive licenses. 
+I have tried to use only open-source libraries and tools to make it easy to modify and extend the software without vendor lock-in or expensive licenses. I use Linux Ubuntu 22.04.5 LTS and the following tools:
 
 * Visual studio code with PlatformIO extension is used as development environment for the software.
-* KiCad is used for designing the hardware.
-* FreeCad is used for designing the enclosures.
+* KiCad is used for designing the hardware (version 8.0.9)
+* FreeCad is used for designing the enclosures (version 1.0.2)
+* Shotcut is used for video editing (version 25.11.2)
+* Gimp is used for image editing (version 3.0.6)
+
+I also use these (non-free) ai-tools:
+
+* ChatGPT premium
+* Github copilot
 
 If you have suggestions for improvements, please consider contributing via pull-requests, opening an issue or contact me via pm or email.
+
+If you like the project and want to support it, consider donating a small amount via link:https://www.paypal.com/donate/?business=6X9PRDMLYC4NN&no_recurring=1&currency_code=SEK[PayPal] or buy a hardware-device from link:https://www.sensorwebben.se[Sensorwebben.se].
+
+[TIP]
+====
+image:doc/pcbway-logo.png[PcbWay,100,link=https://www.pcbway.com/]
+
+*link:https://www.pcbway.com/[PCBWay]* kindly supported this project by manufacturing the first batch of the soon comming CatActivityDetector PCBs. Please visit their site if you need PCB manufacturing or assembly services. There are lots of options for low-cost prototyping and small series production.
+====
+
 
 == Overview
 
 The software supports:
 
 * Interfacing with sensors like DHT11, DHT22, and HX711 (weight-scale).
-* Local communication with Home Assistant via MQTT.
-* Remote communication with Home Assistant via Nabu Casa web-hooks and MQTT trigger automation.
+* Local communication with Home Assistant via MQTT (this is the main use-case).
 * Configuration and testing of new hardware using a setup software.
+* Option: the software can be set up to communicate remotely with Home Assistant via Nabu Casa web-hooks and MQTT trigger automation 
+
+When bying a sensor-device from Sensorwebben.se, the local communicating software is pre-installed and ready to use. You only need to configure it via the web-portal that the device creates in configuration mode.
 
 The software is built using the PlatformIO build system and the Arduino framework, making it modular and extensible for adding new sensors and features.
 
@@ -36,7 +55,6 @@ The software is divided into four main configurations for each sensor-type:
 3. **setup-local**: For testing and configuring new hardware with local communication.
 4. **setup-remote**: For testing and configuring new hardware with remote communication.
 
-In the future, the local and remote configurations will be merged into a single software.
 
 == Features
 
@@ -47,9 +65,11 @@ In the future, the local and remote configurations will be merged into a single 
 
 == Prerequisites
 
-1. **WiFi Coverage**: Ensure the sensor device can connect to your WiFi network.
-2. **Home Assistant**: A working Home Assistant installation is required.
-3. **MQTT Server**: Install and configure an MQTT server (e.g., Mosquitto) in your Home Assistant setup for automatic device discovery and integration.
+These are the prerequisites for using the devices from sensorwebben.se. Make sure these are fulfilled before bying or building a sensor-device. 
+
+1. **WiFi Coverage**: You need good enough wifi reception for the sensor device to connect to your WiFi network.
+2. **Home Assistant**: You need a working Home Assistant installation to receive and show the data.
+3. **MQTT Server**: You need an MQTT server (e.g. Mosquitto) in your Home Assistant setup for automatic device discovery and integration.
 
 For more details on Home Assistant, visit: link:https://www.home-assistant.io/[Home Assistant].
 
@@ -79,7 +99,7 @@ The red LED blinks to indicate errors:
 === Messaging
 The device sends two types of messages to Home Assistant:
 
-1. **Discovery Messages**: Sent during setup to configure the sensor as a 'device' in Home Assistant.
+1. **Discovery Messages**: Sent during setup to configure the sensor as a 'device' in Home Assistant with 'retain' set to true.
 2. **Publish Messages**: Sent during normal operation to report data from the sensors 'entities'.
 
 When configured correctly from the webportal of the sensor-device, the sensor values shows up directly in Home Assistant default view and could be used in dashboards immediately.
@@ -113,6 +133,7 @@ The project is organized into several directories:
 * **lib**: Contains external libraries used in the project.
 * **test**: Contains unit tests for the project (not implemented yet).
 * **doc**: Contains documentation files for the project.
+* **hw**: Contains some hardware design files (PCB layouts, circuit diagrams, enclosure designs). More to come in the near future.
 * **README.md**: Contains the main documentation for the project.
 * **LICENSE**: Contains the license information for the project.
 * **platformio.ini**: Contains the configuration for the PlatformIO build system.
@@ -121,73 +142,35 @@ The project is organized into several directories:
 
 The project defines multiple environments in the `platformio.ini` file to simplify building and uploading firmware for different hardware and use cases. Each environment corresponds to a specific configuration of the ESP8266 or ESP32 microcontroller.
 
-To select an environment from the platformio gui, open the PlatformIO extension in Visual Studio Code and select the desired environment from the drop-down menu. 
+To select an environment from the platformio gui, open the PlatformIO extension in Visual Studio Code and select the desired environment from the drop-down menu at the bottom. 
 
-Alternatively, you can use the command line to build and upload firmware for a specific environment.
 
-To build for a specific environment, use the PlatformIO command:
+== Hardware and sensor products
 
-    pio run -e <environment>
+Here you will find product documentation for hardware using this software. More hardware designs will be added in the future.
 
-To upload firmware to your device, use:
-
-    pio run -e <environment> -t upload
-
-Replace `<environment>` with the desired environment name from above.
-
-== Hardware
+All hardware designs are made using KiCad and the design files are included in the `hw` directory of the project. Each sensor-type has its own subdirectory with PCB layouts, circuit diagrams, and enclosure designs. 
 
 === Sensorwebben Misto
-The PCB is designed for the link:https://www.sensorwebben.se/produkt-misto/['Misto'] sensor and uses ESP8266 and a DHT11/DHT22 sensor but includes optional footprints and connectors for:
-
-* I2C sensors
-* Dallas one-wire sensors
-* HSM circuits (via I2C) 
-* LiPo charger and batteries
-
-image:doc/hw/misto_hardware.jpg[Misto PCB without enclosure]
-
-==== Misto Circuit Diagram
-The circuit diagram for the ESP8266 sensor is included in the project: link:doc/hw/misto_circuit.pdf[Circuit Diagram]. 
-
-==== Misto PCB Design
-link:https://aisler.net/p/QNSKHTQB[Direct link to the shared PCB at Aisler.net]
-
-==== Misto Enclosure Design
-FreeCad design files for the Misto enclosure will soon be available in the `doc/hw/enclosure` directory.
-
-=== Sensorwebben ApiScale
-The PCB is designed for DHT11/DHT22 and HX711 weight-scale sensors and includes optional footprints and connectors for:
-
-* I2C sensors
-* Dallas one-wire sensors
-* LiPo charger and batteries
-
-
-=== Programming Interface
-All types of PCBs has a 5-pin programming interface with the same 'pinning'. The pinout is as follows and the picture shows the Misto variant (left to right)
-
-1. **+3V3**: Use only without batteries installed.
-2. **GND**: Connect to the programmer's GND pin.
-3. **>TX**: Connect to the programmer's TX pin.
-4. **>RX**: Connect to the programmer's RX pin.
-5. **PGM**: Connect to GND for programming mode before flashing firmware.
-
-image:doc/programming-interface.jpg[Misto Programming Interface]
-
+The Misto is a compact environmental sensor device designed for indoor use. It is built around the ESP8266 microcontroller and provides wireless connectivity for home automation and environmental monitoring applications.
+This device uses the z_main_misto* firmware configurations of this software.
+link:hw/misto/misto.adoc[Misto Documentation]
 
 
 == Future Plans (some)
 
-* Provide additional design files for hardware.
-* Implement unit tests for the software components.
 * Add support for more sensors and hardware features.
 * Design and implement more types of sensors-products
+* Add a USB-C port for external power and programming without the need of a separate programmer.
 
 == Additional Resources
 
 * link:doc/discovery_msg.adoc[Discovery Message Documentation]
 * link:doc/publish_msg.adoc[Publish Message Documentation]
 * link:doc/remote-automation.yaml[Example of remote automation for a web-hook]
-* link:https://www.home-assistant.io/[Home Assistant]
-* link:https://www.nabucasa.com/[Nabu Casa]
+* link:https://www.home-assistant.io/[Home Assistant - Open source home automation platform]
+* link:https://www.nabucasa.com/[Nabu Casa - Home Assistant Cloud Service]
+* link:https://www.sensorwebben.se[Sensorwebben - open source sensors for home automation]
+* link:https://www.aisler.net[Aisler - PCB manufacturing service in EU]
+* link:https://www.pcbway.com/[PCBWay - PCB manufacturing service]
+* link:https://www.electrokit.se/[Electrokit - Electronics components store in Sweden]

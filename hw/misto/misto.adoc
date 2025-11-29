@@ -1,0 +1,135 @@
+:toc:
+:toc-title: Table of Contents
+:toc-placement: preamble
+
+= Misto - Environmental Sensor Device
+
+The Misto is a compact, battery-powered environmental monitoring device designed for indoor use. Built around the ESP8266 microcontroller, it provides wireless connectivity operation for home automation and environmental monitoring applications.
+
+All open-source, hardware and software designs are available in this repository for building your own Misto devices or get inspired for other projects.
+
+== Overview
+
+Misto is a versatile sensor platform that measures temperature, humidity, and monitors its own battery status. The device is designed for integration with Home Assistant and other IoT platforms through MQTT communication, making it ideal for smart home deployments.
+
+image:misto_hardware.jpg[Misto PCB without enclosure]
+
+
+
+
+== Hardware Specifications
+
+=== Microcontroller
+* ESP8266-based design
+* WiFi 802.11 b/g/n connectivity
+* Deep sleep capability for extended battery life
+
+=== Sensors
+* Temperature and humidity sensor (DHT22/DHT11 compatible)
+* Battery voltage monitoring
+* Signal strength (RSSI) reporting
+
+=== Power Management
+* Battery-powered operation
+* Low-power design with deep sleep modes
+* Battery level monitoring and reporting
+* Configurable sleep intervals for power optimization
+
+=== Connectivity
+* WiFi connectivity with automatic reconnection
+* MQTT protocol support
+* Home Assistant auto-discovery
+* Web-based configuration interface
+
+== Key Features
+
+=== Smart Power Management
+The device implements intelligent power management through:
+
+* Configurable sleep intervals (minutes to hours)
+* Automatic sensor power control
+* Battery voltage monitoring with low-battery alerts
+* Deep sleep mode between measurements
+
+=== Easy Configuration
+* WiFi credentials and setup through web-portal, accessible via WiFi
+* No programming required for basic operation
+* Configurable MQTT broker settings
+
+=== Home Assistant Integration
+* Automatic device discovery
+* Real-time sensor data reporting
+* Battery status monitoring
+* Signal strength reporting
+* Customizable measurement intervals
+
+=== Robust Operation
+* Automatic WiFi reconnection
+* MQTT connection retry logic
+* Error indication through LED feedback
+
+== Technical Specifications
+
+* Operating Voltage: 3.3V (battery powered with 3xAAA)
+* Temperature Range: -40°C to +80°C
+* Humidity Range: 0-100% RH
+* Battery Life: depending on reporting interval, wifi-strength and battery capacity, typical 6 month
+* All types of AAA batteries including rechargeable can be used
+
+== Use Cases
+
+* Indoor climate monitoring
+* Home automation sensor networks
+* Energy-efficient environmental logging
+* Remote monitoring applications
+* Smart home integration projects
+
+
+
+== Misto Programming Interface
+Misto has a 5-pin programming interface with this pinout (left to right)
+
+1. **+3V3**: Use only without batteries installed.
+2. **GND**: Connect to the programmer's GND pin.
+3. **>TX**: Connect to the programmer's TX pin.
+4. **>RX**: Connect to the programmer's RX pin.
+5. **PGM**: Connect to GND at power-on or RESET for programming mode before flashing firmware.
+
+image:../../doc/programming-interface.jpg[Misto Programming Interface]
+
+
+== References and Design Files
+
+This section provides links to the hardware design files and documentation for the Misto environmental sensor device.
+Unfurthunatly Misto was designed before I started to use KiCad for all my hardware designs. There will soon be a new version of Misto designed in KiCad and that design will be open-sourced.
+
+
+
+=== Hardware Design Files
+
+==== Schematics
+* link:misto_sch.pdf[Misto Schematic (PDF)] 
+- Complete electrical schematic diagram
+
+==== PCB Layout
+* As mentioned before, Misto will soon have a new PCB design in KiCad. The current design files are not available in open-source format.
+* However, the PCB can be ordered from here: https://aisler.net/p/QNSKHTQB
+
+==== Freecad Enclosure Design
+* link:misto_enclosure.zip[Misto Enclosure Design Files (ZIP)] 
+  - CAD source files for 3d printed enclosure
+
+
+=== Additional Resources
+
+* link:https://www.sensorwebben.se/produkt-misto/[Sensorwebben Misto Product Page] 
+
+=== Manufacturing Notes
+
+The hardware design files provided can be used for:
+
+* 3D printing of the protective enclosure
+* Creating custom variations of the Misto design
+
+All design files are provided under open-source licensing terms. 
+
