@@ -30,6 +30,11 @@ If you like the project and want to support it, consider donating a small amount
 image:doc/pcbway-logo.png[PcbWay,100,link=https://www.pcbway.com/]
 
 *link:https://www.pcbway.com/[PCBWay]* kindly supported this project by manufacturing the first batch of the soon comming CatActivityDetector PCBs. Please visit their site if you need PCB manufacturing or assembly services. There are lots of options for low-cost prototyping and small series production.
+
+PCB by: PCBWay,   
+Assembly by: Sensorwebben.se
+
+image:doc/cattoy_v1.jpg[Cat Activity Detector PCB]
 ====
 
 
