@@ -182,5 +182,5 @@ The hardware modification proves the auto-reset concept works perfectly when tim
 ## References
 
 * [Complete software configuration test documentation](auto_reset_test_configs.txt)
-* [Current PlatformIO configuration with hardware timing optimization](platformio.ini)
-* [Test firmware used for upload verification](z_main_test.cpp)
+* [Current PlatformIO configuration with hardware timing optimization](sw/platformio.ini)
+* [Test firmware used for upload verification](sw/src/z_main_test.cpp)

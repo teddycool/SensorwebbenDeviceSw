@@ -1,7 +1,9 @@
-.pio/*
+# PlatformIO build artifacts
+sw/.pio/*
 .vscode/*
 
-boxsecrets.cpp
+# Generated configuration files  
+sw/src/boxsecrets.cpp
 
 #My backup-files
 *.bak

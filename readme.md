@@ -163,13 +163,15 @@ public:
 ### Project Structure
 
 ```
-├── src/                 # Main application code
-├── include/             # Header files and interfaces
-├── lib/                 # External dependencies
+├── sw/                  # Software (PlatformIO project)
+│   ├── src/             # Main application code
+│   ├── include/         # Header files and interfaces
+│   ├── lib/             # External dependencies
+│   ├── platformio.ini   # Build configuration
+│   └── test/            # Test files
 ├── hw/                  # Hardware designs (KiCad)
 ├── doc/                 # Technical documentation
-├── platformio.ini       # Build configuration
-└── README.adoc          # This documentation
+└── readme.md            # This documentation
 ```
 
 ### PlatformIO Build System
@@ -210,6 +212,9 @@ Each hardware variant has dedicated build configurations:
 
 #### Usage
 ```bash
+# Navigate to software directory
+cd sw/
+
 # Build specific environment
 pio run -e misto_setup
 
@@ -229,7 +234,7 @@ All hardware designs are made using KiCad and the design files are included in t
 ### Sensorwebben Misto
 The Misto is a compact environmental sensor device designed for indoor use. It is built around the ESP8266 microcontroller and provides wireless connectivity for home automation and environmental monitoring applications.
 This device uses the z_main_misto* firmware configurations of this software.
-[Misto Documentation](hw/misto/misto.md)
+[Misto Documentation](hw/misto/)
 
 ## Future Plans (some)
 
