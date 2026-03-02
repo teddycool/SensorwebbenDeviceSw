@@ -1,0 +1,89 @@
+{
+    "device": "cattoy_accelerometer",
+    "chip_id": "11171608",
+    "timestamp": 1607833,
+    "sample_count": 10,
+    "sample_rate_hz": 10,
+    "readings": [
+        {
+            "index": 0,
+            "x": -176.67,
+            "y": -597.87,
+            "z": 102.57,
+            "activity_level": 5,
+            "timestamp": 1606666
+        },
+        {
+            "index": 1,
+            "x": -166.92,
+            "y": -383.37,
+            "z": 174.72,
+            "activity_level": 5,
+            "timestamp": 1606779
+        },
+        {
+            "index": 2,
+            "x": 15.21,
+            "y": -547.17,
+            "z": 312.78,
+            "activity_level": 5,
+            "timestamp": 1606891
+        },
+        {
+            "index": 3,
+            "x": -202.41,
+            "y": -597.48,
+            "z": 388.05,
+            "activity_level": 5,
+            "timestamp": 1607004
+        },
+        {
+            "index": 4,
+            "x": 15.21,
+            "y": -526.4999,
+            "z": 372.06,
+            "activity_level": 5,
+            "timestamp": 1607116
+        },
+        {
+            "index": 5,
+            "x": 46.8,
+            "y": -485.55,
+            "z": 414.18,
+            "activity_level": 2.866498,
+            "timestamp": 1607227
+        },
+        {
+            "index": 6,
+            "x": 51.87,
+            "y": -478.53,
+            "z": 433.29,
+            "activity_level": 0.779999,
+            "timestamp": 1607340
+        },
+        {
+            "index": 7,
+            "x": 32.76,
+            "y": -471.12,
+            "z": 418.47,
+            "activity_level": 1.033497,
+            "timestamp": 1607453
+        },
+        {
+            "index": 8,
+            "x": 32.37,
+            "y": -506.61,
+            "z": 388.44,
+            "activity_level": 1.64775,
+            "timestamp": 1607565
+        },
+        {
+            "index": 9,
+            "x": 125.58,
+            "y": -553.02,
+            "z": 274.17,
+            "activity_level": 5,
+            "timestamp": 1607677
+        }
+    ]
+}

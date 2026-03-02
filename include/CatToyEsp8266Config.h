@@ -1,24 +1,21 @@
-// This file contains the configuration for the ESP8266 device.
+// This file contains the configuration for the ESP8266 cat-toy device.
 // It includes the pin definitions, sensor types, and other device-specific settings.
-#ifndef ESP8266CONFIG_H     
-#define ESP8266CONFIG_H
+#ifndef CatToyEsp8266CONFIG_H     
+#define CatToyEsp8266CONFIG_H
 
-#define DHTTYPE 22 // DHT 11 or 22 (AM2302)
-
-#define SWVERSION "V3.0.0"
+#define SWVERSION "V1.0.0"
 #define COMTYPE "Local MQTT"
-#define HWVERSION "V5.0 ESP8266"
-#define SENSORMODEL "Sensor Model Misto DHT" + String(DHTTYPE)
+#define HWVERSION "V1.0 ESP8266 cat-toy"
+#define SENSORMODEL "Sensor Model CatToy" + String(DHTTYPE)
 
 // In some hw versions of esp8266 these pin-no are reversed sw-hw pin ie io5 -> pin-io4!
-#define DHTPIN 4
 #define MODEPIN 5
-#define LEDPIN 15
-#define PWRPIN 13
+#define MOTOR_PIN 4     // motor MOSFET gate via resistor
+#define I2C_SDA   14    // ADXL345 SDA
+#define I2C_SCL   12    // ADXL345 SCL
 
 
-
-#define TEST_VOLTAGE 5.0
+#define TEST_VOLTAGE 3.5
 
 #define MQTT_LOCAL true // true = local mqtt broker (default), false = remote mqtt connection via Nabu Casa web-hook
 #define WIFI_MAX_TRIES 10 // Number of tries to connect to wifi

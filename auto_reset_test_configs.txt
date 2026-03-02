@@ -1,0 +1,73 @@
+ESP32 Auto-Reset Configuration Test Matrix
+=============================================
+
+Test these configurations in platformio.ini one by one:
+
+CONFIG 1: Soft Reset with Delay
+===============================
+board_upload.before_reset = default_reset
+board_upload.after_reset = soft_reset
+board_upload.use_1200bps_touch = false
+board_upload.wait_for_upload_port = true
+upload_speed = 115200
+
+CONFIG 2: No Reset Before, Hard After
+=====================================
+board_upload.before_reset = no_reset
+board_upload.after_reset = hard_reset
+board_upload.use_1200bps_touch = false
+board_upload.wait_for_upload_port = false
+upload_speed = 115200
+
+CONFIG 3: USB Reset with 1200bps
+===============================
+board_upload.before_reset = usb_reset
+board_upload.after_reset = soft_reset
+board_upload.use_1200bps_touch = true
+board_upload.wait_for_upload_port = true
+upload_speed = 460800
+
+CONFIG 4: Lower Speed with Default
+==================================
+board_upload.before_reset = default_reset
+board_upload.after_reset = hard_reset
+board_upload.use_1200bps_touch = false
+board_upload.wait_for_upload_port = false
+upload_speed = 57600
+
+CONFIG 5: Minimal Reset
+======================
+board_upload.before_reset = default_reset
+board_upload.after_reset = no_reset
+board_upload.use_1200bps_touch = false
+board_upload.wait_for_upload_port = false
+upload_speed = 115200
+
+CONFIG 6: Custom Timing
+======================
+board_upload.before_reset = usb_reset
+board_upload.after_reset = no_reset
+board_upload.use_1200bps_touch = false
+board_upload.wait_for_upload_port = false
+upload_speed = 921600
+
+HARDWARE MODIFICATIONS TO TRY:
+==============================
+1. Increase reset capacitor from 100nF to 220nF or 470nF (slower reset)
+2. Add 10kΩ pull-up resistor on EN pin
+3. Add 10kΩ pull-up resistor on GPIO0 pin  
+4. Try 1µF capacitor (like original working board)
+5. Add small delay capacitor (10-22pF) between DTR and reset circuit
+
+TEST PROCEDURE:
+==============
+1. Copy each config to platformio.ini
+2. Run: pio run -e esp32_test --target upload
+3. Note result (success/failure/error type)
+4. If success, verify with: stty -F /dev/ttyUSB1 9600 && cat /dev/ttyUSB1
+
+MOST PROMISING CONFIGS TO TRY FIRST:
+====================================
+- CONFIG 4 (lower speed often helps)
+- CONFIG 2 (minimal auto-reset)
+- CONFIG 1 (soft reset is gentler)

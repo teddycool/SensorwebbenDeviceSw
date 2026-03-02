@@ -21,6 +21,13 @@ public:
     void sendTemperature();
     void sendHumidity();
     void sendMqttTries();
+    
+    // ADXL345 acceleration sensor discovery methods
+    void sendAccelX();
+    void sendAccelY();
+    void sendAccelZ();
+    void sendAccelMagnitude();
+    void sendAccelXYForce();
 
 private:
     MqttPublisher &mqttPublisher_;

@@ -1,8 +1,6 @@
-:toc:
-:toc-title: Table of Contents
-:toc-placement: preamble
+# Sensorwebben Device Documentation
 
-= Sensorwebben Device Documentation
+## Table of Contents
 
 This repository contains complete open-source designs for IoT sensor devices, including both firmware and hardware (PCB layouts, circuit diagrams, and enclosure designs). The devices are built around ESP8266/ESP32 microcontrollers and integrate seamlessly with Home Assistant via MQTT.
 
@@ -21,24 +19,21 @@ The project prioritizes open-source tools and libraries to ensure accessibility 
 
 If you have suggestions for improvements, please consider contributing via pull-requests, opening an issue or contact me via pm or email.
 
-If you like the project and want to support it, consider donating a small amount via link:https://www.paypal.com/donate/?business=6X9PRDMLYC4NN&no_recurring=1&currency_code=SEK[PayPal] or buy a hardware-device from link:https://www.sensorwebben.se[Sensorwebben.se].
+If you like the project and want to support it, consider donating a small amount via [PayPal](https://www.paypal.com/donate/?business=6X9PRDMLYC4NN&no_recurring=1&currency_code=SEK) or buy a hardware-device from [Sensorwebben.se](https://www.sensorwebben.se).
 
-[TIP]
-====
-image:doc/pcbway-logo.png[PcbWay,100,link=https://www.pcbway.com/]
+> **💡 Tip**  
+> [![PcbWay](doc/pcbway-logo.png)](https://www.pcbway.com/)
+>
+> **[PCBWay](https://www.pcbway.com/)** kindly supported this project by manufacturing the first batch of the soon coming CatActivityDetector PCBs. Please visit their site if you need PCB manufacturing or assembly services. There are lots of options for low-cost prototyping and small series production.
+>
+> PCB by: PCBWay,   
+> Assembly by: Sensorwebben.se
+>
+> ![Cat Activity Detector PCB](doc/cattoy_v1.jpg)
 
-*link:https://www.pcbway.com/[PCBWay]* kindly supported this project by manufacturing the first batch of the soon coming CatActivityDetector PCBs. Please visit their site if you need PCB manufacturing or assembly services. There are lots of options for low-cost prototyping and small series production.
+## Overview
 
-PCB by: PCBWay,   
-Assembly by: Sensorwebben.se
-
-image:doc/cattoy_v1.jpg[Cat Activity Detector PCB]
-====
-
-
-== Overview
-
-=== Supported Features
+### Supported Features
 
 * **Sensor Integration**: DHT11/DHT22 (temperature/humidity), HX711 (precision weight), I2C sensors
 * **Home Assistant Integration**: Automatic device discovery via MQTT with retained configuration messages
@@ -47,7 +42,7 @@ image:doc/cattoy_v1.jpg[Cat Activity Detector PCB]
 * **Power Management**: Configurable deep sleep cycles for battery operation
 * **Error Handling**: Visual LED feedback and comprehensive serial logging
 
-=== Architecture
+### Architecture
 
 Built on PlatformIO and Arduino framework with clean separation of concerns:
 
@@ -56,10 +51,9 @@ Built on PlatformIO and Arduino framework with clean separation of concerns:
 * **Configuration management** - Persistent storage with factory reset capability
 * **State machine design** - Reliable mode switching and error recovery
 
+## Prerequisites
 
-== Prerequisites
-
-=== For End Users
+### For End Users
 
 Before deploying sensor devices, ensure you have:
 
@@ -67,33 +61,33 @@ Before deploying sensor devices, ensure you have:
 2. **Home Assistant**: Running instance with MQTT integration enabled
 3. **MQTT Broker**: Mosquitto or similar (often bundled with Home Assistant)
 
-=== For Developers
+### For Developers
 
 1. **Development Environment**: PlatformIO with ESP32/ESP8266 platform support
 2. **Hardware**: ESP development board or custom PCB with auto-reset capability
 3. **Testing Setup**: MQTT broker for local development and testing
 
-For more details on Home Assistant, visit: link:https://www.home-assistant.io/[Home Assistant].
+For more details on Home Assistant, visit: [Home Assistant](https://www.home-assistant.io/).
 
-== How It Works
+## How It Works
 
-=== Device Operation Modes
+### Device Operation Modes
 
 The firmware implements a state machine with two primary operational modes:
 
-==== Configuration Mode (Setup)
+#### Configuration Mode (Setup)
 * **Access Point**: Creates WiFi hotspot for initial setup
 * **Captive Portal**: Web interface for WiFi credentials, MQTT broker settings, and device parameters
 * **Discovery**: Sends Home Assistant MQTT discovery messages with device metadata
 * **Validation**: Tests connectivity before saving configuration
 
-==== Standard Mode (Operation)
+#### Standard Mode (Operation)
 * **Boot Sequence**: Validates stored configuration and establishes connections
 * **Sensor Loop**: Periodic wake → measure → publish → sleep cycle
 * **Deep Sleep**: Configurable intervals for power efficiency
 * **Error Recovery**: Automatic retry logic with exponential backoff
 
-==== Error Indication (in std mode)
+#### Error Indication (in std mode)
 
 The red LED blinks to indicate errors:
 
@@ -101,33 +95,33 @@ The red LED blinks to indicate errors:
 * **3 blinks**: MQTT connection failed.
 * **4+ blinks**: Internal error (check serial output for details).
 
-=== MQTT Communication Protocol
+### MQTT Communication Protocol
 
-==== Discovery Messages (Setup Phase)
+#### Discovery Messages (Setup Phase)
 
 * **Topic Structure**: `homeassistant/sensor/{device_id}/{entity}/config`
 * **Retained**: Yes - ensures Home Assistant rediscovers devices after restarts
 * **Content**: Device metadata, entity definitions, and availability topics
 * **Triggered**: During initial setup and factory reset
 
-==== State Messages (Operational)
+#### State Messages (Operational)
 
 * **Topic Structure**: `homeassistant/sensor/{device_id}/{entity}/state`
 * **Retained**: No - real-time sensor data
 * **Format**: JSON payload with sensor readings and metadata
 * **Frequency**: Configurable (default: every 60 seconds)
 
-==== Availability Monitoring
+#### Availability Monitoring
 
 * **Topic**: `{device_topic}/availability`
 * **Payloads**: "online"/"offline" for connection status tracking
 * **Last Will**: Automatic "offline" message on unexpected disconnection
 
-image:doc/ha-added-sensor-w-first-values.png[Home Assistant Added Sensor with First Values]
+![Home Assistant Added Sensor with First Values](doc/ha-added-sensor-w-first-values.png)
 
-== Software Architecture
+## Software Architecture
 
-=== Core Interfaces
+### Core Interfaces
 
 The firmware uses clean abstraction layers for extensibility:
 
@@ -152,7 +146,7 @@ public:
 };
 ```
 
-=== Implemented Components
+### Implemented Components
 
 **Sensor Drivers**:
 
@@ -166,7 +160,7 @@ public:
 * `MqttPublisher` - Local MQTT broker communication
 * `HaRemoteClient` - Nabu Casa webhook integration
 
-=== Project Structure
+### Project Structure
 
 ```
 ├── src/                 # Main application code
@@ -178,13 +172,11 @@ public:
 └── README.adoc          # This documentation
 ```
 
-
-
-=== PlatformIO Build System
+### PlatformIO Build System
 
 Multiple build environments support different hardware platforms and use cases:
 
-==== Platform Configurations
+#### Platform Configurations
 
 **ESP8266 Targets**:
 ```ini
@@ -207,7 +199,7 @@ upload_protocol = esptool
 ; Auto-reset timing optimized for custom PCBs
 ```
 
-==== Device-Specific Environments
+#### Device-Specific Environments
 
 Each hardware variant has dedicated build configurations:
 
@@ -216,7 +208,7 @@ Each hardware variant has dedicated build configurations:
 * `cattoy_*` - Pet activity detection and monitoring
 * `*_test` - Development and hardware validation
 
-==== Usage
+#### Usage
 ```bash
 # Build specific environment
 pio run -e misto_setup
@@ -228,36 +220,34 @@ pio run -e esp32_test --target upload
 pio device monitor -e esp32_test
 ```
 
-
-== Hardware and sensor products
+## Hardware and sensor products
 
 Here you will find product documentation for hardware using this software. More hardware designs will be added in the future.
 
 All hardware designs are made using KiCad and the design files are included in the `hw` directory of the project. Each sensor-type has its own subdirectory with PCB layouts, circuit diagrams, and enclosure designs. 
 
-=== Sensorwebben Misto
+### Sensorwebben Misto
 The Misto is a compact environmental sensor device designed for indoor use. It is built around the ESP8266 microcontroller and provides wireless connectivity for home automation and environmental monitoring applications.
 This device uses the z_main_misto* firmware configurations of this software.
-link:hw/misto/misto.adoc[Misto Documentation]
+[Misto Documentation](hw/misto/misto.md)
 
-
-== Future Plans (some)
+## Future Plans (some)
 
 * Add support for more sensors and hardware features.
 * Design and implement more types of sensors-products
 * Add a USB-C port for external power and programming without the need of a separate programmer.
 
-== Additional Resources
+## Additional Resources
 
-* link:doc/discovery_msg.adoc[Discovery Message Documentation]
-* link:doc/publish_msg.adoc[Publish Message Documentation]
-* link:doc/remote-automation.yaml[Example of remote automation for a web-hook]
-* link:https://www.home-assistant.io/[Home Assistant - Open source home automation platform]
-* link:https://www.nabucasa.com/[Nabu Casa - Home Assistant Cloud Service]
-* link:https://www.sensorwebben.se[Sensorwebben - open source sensors for home automation]
+* [Discovery Message Documentation](doc/discovery_msg.md)
+* [Publish Message Documentation](doc/publish_msg.md)
+* [Example of remote automation for a web-hook](doc/remote-automation.yaml)
+* [Home Assistant - Open source home automation platform](https://www.home-assistant.io/)
+* [Nabu Casa - Home Assistant Cloud Service](https://www.nabucasa.com/)
+* [Sensorwebben - open source sensors for home automation](https://www.sensorwebben.se)
 
-== Some suppliers I use for this project
-* link:https://www.aisler.net[Aisler - PCB manufacturing service in EU]
-* link:https://www.pcbway.com/[PCBWay - PCB manufacturing service worldwide]
-* link:https://www.electrokit.se/[Electrokit - Electronics components store in Sweden]
-* link:https://www.digikey.com/[DigiKey - Electronics components store worldwide]
+## Some suppliers I use for this project
+* [Aisler - PCB manufacturing service in EU](https://www.aisler.net)
+* [PCBWay - PCB manufacturing service worldwide](https://www.pcbway.com/)
+* [Electrokit - Electronics components store in Sweden](https://www.electrokit.se/)
+* [DigiKey - Electronics components store worldwide](https://www.digikey.com/)

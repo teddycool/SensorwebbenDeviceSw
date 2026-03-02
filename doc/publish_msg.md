@@ -1,0 +1,23 @@
+# The publish message for Homeassistant
+
+This is the pattern for the publish-message sent to Homeassistant at every measuring cycle.
+
+The sensor sends the message to the Homeassistant mqtt-broker to the following topic: 
+
+`home/sensor/sw_<devid>`
+
+with the following format and value-content for each 'sensor' entity. 
+
+```json
+{
+        "temperature": 42,
+        "humidity": 5,
+        "battery": 3.932,
+        "abat": 582,
+        "rssi": "-66",
+        "wifitries": 2,
+        "mqtttries": 1,
+        "localip": "192.168.68.101",
+        "ssid": "dlink-4ECC"
+    }
+```

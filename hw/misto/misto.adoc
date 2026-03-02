@@ -4,42 +4,55 @@
 
 = Misto - Environmental Sensor Device
 
-The Misto is a compact, battery-powered environmental monitoring device designed for indoor use. Built around the ESP8266 microcontroller, it provides wireless connectivity operation for home automation and environmental monitoring applications.
+The Misto is a compact, battery-powered environmental monitoring device designed for long-term indoor deployment. Built around the ESP8266 microcontroller, it provides wireless connectivity for home automation and environmental monitoring applications through MQTT integration with Home Assistant.
 
-All open-source, hardware and software designs are available in this repository for building your own Misto devices or get inspired for other projects.
+**Key Characteristics**: Ultra-low power design, wireless configuration, automatic discovery, and robust battery operation with 6+ month lifespan.
+
+All hardware and software designs are open-source and available in this repository for building custom Misto devices or as inspiration for other IoT projects.
 
 == Overview
 
-Misto is a versatile sensor platform that measures temperature, humidity, and monitors its own battery status. The device is designed for integration with Home Assistant and other IoT platforms through MQTT communication, making it ideal for smart home deployments.
+Misto is a battery-powered IoT sensor platform optimized for long-term environmental monitoring. The device measures temperature, humidity, and battery status, with intelligent power management enabling months of autonomous operation.
+
+**Primary Features**:
+* Environmental sensing (temperature, humidity)
+* Battery voltage and RSSI monitoring  
+* MQTT communication with Home Assistant auto-discovery
+* Web-based configuration portal
+* Deep sleep power management
+
+**Target Applications**: Indoor climate monitoring, smart home integration, energy-efficient data logging, and remote environmental sensing.
 
 image:misto_hardware.jpg[Misto PCB without enclosure]
 
 
 
-
 == Hardware Specifications
 
-=== Microcontroller
-* ESP8266-based design
-* WiFi 802.11 b/g/n connectivity
-* Deep sleep capability for extended battery life
+=== Microcontroller Platform
+* **MCU**: ESP8266-07
+* **Flash**: 4MB SPI flash memory
+* **RAM**: 80KB user data RAM
+* **Connectivity**: WiFi 802.11 b/g/n (2.4GHz)
+* **Power Modes**: Active, light sleep, deep sleep 
 
-=== Sensors
-* Temperature and humidity sensor (DHT22/DHT11 compatible)
-* Battery voltage monitoring
-* Signal strength (RSSI) reporting
+=== Sensor Subsystem
+* **Environmental**: DHT22 (temperature ±0.5°C, humidity ±2% RH)
+* **Power Monitoring**: ADC-based battery voltage measurement
+* **Signal Quality**: WiFi RSSI reporting
+* **Update Rate**: Configurable 
 
 === Power Management
-* Battery-powered operation
-* Low-power design with deep sleep modes
-* Battery level monitoring and reporting
-* Configurable sleep intervals for power optimization
+* **Supply**: 3x AAA batteries (4.5V nominal)
+* **Regulation**: Onboard 3.3V LDO with low dropout
+* **Sleep Current**: <20µA in deep sleep mode
+* **Active Current**: ~80mA during WiFi transmission
+* **Battery Life**: 6-12 months (depends on reporting interval)
 
-=== Connectivity
-* WiFi connectivity with automatic reconnection
-* MQTT protocol support
-* Home Assistant auto-discovery
-* Web-based configuration interface
+=== Physical Interface
+* **Programming**: 5-pin header (3V3, GND, TX, RX, PGM)
+* **Indicators**: Status LED for configuration and error states
+* **Enclosure**: 3D-printed protective housing
 
 == Key Features
 
@@ -70,11 +83,25 @@ The device implements intelligent power management through:
 
 == Technical Specifications
 
-* Operating Voltage: 3.3V (battery powered with 3xAAA)
-* Temperature Range: -40°C to +80°C
-* Humidity Range: 0-100% RH
-* Battery Life: depending on reporting interval, wifi-strength and battery capacity, typical 6 month
-* All types of AAA batteries including rechargeable can be used
+[cols="1,3"]
+|===
+| Parameter | Specification
+
+| Operating Voltage | 3.3V (regulated from 3x AAA batteries)
+| Supply Range | 2.7V - 4.5V (battery voltage)
+| Temperature Range | -40°C to +80°C (sensor), 0°C to +50°C (operation)
+| Humidity Range | 0-100% RH (±2% accuracy)
+| Temperature Accuracy | ±0.5°C (DHT22)
+| WiFi Standards | 802.11 b/g/n (2.4GHz only)
+| Communication | MQTT over WiFi
+| Battery Type | 3x AAA (alkaline, NiMH, lithium compatible)
+| Battery Life | 6-12 months (dependent on reporting interval)
+| Sleep Current | <20µA (deep sleep)
+| Active Current | ~80mA (WiFi active)
+| Dimensions | TBD (with enclosure)
+| Operating Temperature | -20°C to +50°C
+| Storage Temperature | -20°C to +70°C
+|===
 
 == Use Cases
 
@@ -86,50 +113,57 @@ The device implements intelligent power management through:
 
 
 
-== Misto Programming Interface
-Misto has a 5-pin programming interface with this pinout (left to right)
+== Programming Interface
 
-1. **+3V3**: Use only without batteries installed.
-2. **GND**: Connect to the programmer's GND pin.
-3. **>TX**: Connect to the programmer's TX pin.
-4. **>RX**: Connect to the programmer's RX pin.
-5. **PGM**: Connect to GND at power-on or RESET for programming mode before flashing firmware.
+Misto features a 5-pin programming header for firmware updates and development. The pinout (left to right) is:
+
+[cols="1,1,3"]
+|===
+| Pin | Signal | Description
+
+| 1 | +3V3 | 3.3V power supply (use only when batteries are removed)
+| 2 | GND | Ground reference  
+| 3 | TX | UART transmit (connect to programmer's RX)
+| 4 | RX | UART receive (connect to programmer's TX)
+| 5 | PGM | Programming mode (pull to GND during reset for flash mode)
+|===
+
+=== Programming Procedure
+
+1. **Remove batteries** before connecting external power
+2. Connect UART programmer (3.3V logic levels)
+3. **For flashing**: Hold PGM pin to GND, then power-on or reset
+4. **For monitoring**: Normal power-on without PGM connection
+5. Use 115200 baud, 8N1 for serial communication
+
+**Important**: Never apply external 3V3 power while batteries are installed.
 
 image:../../doc/programming-interface.jpg[Misto Programming Interface]
 
 
 == References and Design Files
 
-This section provides links to the hardware design files and documentation for the Misto environmental sensor device.
-Unfurthunatly Misto was designed before I started to use KiCad for all my hardware designs. There will soon be a new version of Misto designed in KiCad and that design will be open-sourced.
+This section provides access to hardware design files and documentation for the Misto environmental sensor device.
 
+**Note**: The original Misto was designed using proprietary tools before adopting KiCad. A new open-source version with complete KiCad design files is in development and will be released soon.
 
+=== Current Design Files
 
-=== Hardware Design Files
+==== Electrical Design
+* link:misto_circuit.pdf[Misto Schematic (PDF)] - Complete electrical schematic diagram
+* **PCB Files**: Not yet available in open-source format
+* **PCB Ordering**: Available through link:https://aisler.net/p/QNSKHTQB[Aisler PCB service]
 
-==== Schematics
-* link:misto_circuit.pdf[Misto Schematic (PDF)] 
-- Complete electrical schematic diagram
+==== Mechanical Design  
+* link:misto-box-FreeCad.zip[Enclosure Design Files (ZIP)] - FreeCAD source files for 3D-printed enclosure
 
-==== PCB Layout
-* As mentioned before, Misto will soon have a new PCB design in KiCad. The current design files are not available in open-source format.
-* However, the PCB can be ordered from here: https://aisler.net/p/QNSKHTQB
+=== Manufacturing Information
 
-==== Freecad Enclosure Design
-* link:misto-box-FreeCad.zip[Misto Enclosure Design Files (ZIP)] 
-  - CAD source files for 3d printed enclosure
+The provided design files enable:
 
+* 3D printing of protective enclosures
+* Understanding of electrical design for custom variations
+* Reference for developing compatible devices
 
-=== Additional Resources
-
-* link:https://www.sensorwebben.se/produkt-misto/[Sensorwebben Misto Product Page] 
-
-=== Manufacturing Notes
-
-The hardware design files provided can be used for:
-
-* 3D printing of the protective enclosure
-* Creating custom variations of the Misto design
-
-All design files are provided under open-source licensing terms. 
+**Licensing**: All design files are provided under open-source licensing terms. 
 

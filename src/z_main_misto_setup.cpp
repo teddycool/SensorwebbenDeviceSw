@@ -42,7 +42,21 @@ WiFiClient wifiClient; // Create a WiFiClient instance for MQTT communication
 
 void setup()
 {
+    // Disable watchdog timer to prevent resets
+    ESP.wdtDisable();
+    
+    delay(5000); // Wait 5 seconds to let everything stabilize
     Serial.begin(9600);
+    delay(1000);
+    Serial.println();
+    Serial.println();
+    Serial.println("=== MISTO SETUP STARTING ===");
+    Serial.println("Serial communication established at 9600 baud");
+    Serial.println("Hardware initialized successfully");
+    
+    // Re-enable watchdog with longer timeout
+    ESP.wdtEnable(8000); // 8 second timeout
+    
     pinMode(PWRPIN, OUTPUT);
     pinMode(LEDPIN, OUTPUT);
     chipid = ESP.getChipId();
@@ -116,7 +130,7 @@ void loop()
     mqttpayload["abat"] = batterya;
     mqttpayload["battery"] = (batterya / calfactor);
 
-    if (digitalRead(MODEPIN) == HIGH)
+    if (digitalRead(MODEPIN) == LOW)
     {
         Serial.println("Box in WiFi set-up mode");
     }

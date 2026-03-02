@@ -77,3 +77,34 @@ void DiscoveryClient::sendMqttTries() {
     String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "mqtttries");
     mqttPublisher_.publish(topic, msg, true);
 }
+
+// ADXL345 acceleration sensor discovery methods
+void DiscoveryClient::sendAccelX() {
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "accel_x", "mg", 1);
+    String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "accel_x");
+    mqttPublisher_.publish(topic, msg, true);
+}
+
+void DiscoveryClient::sendAccelY() {
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "accel_y", "mg", 1);
+    String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "accel_y");
+    mqttPublisher_.publish(topic, msg, true);
+}
+
+void DiscoveryClient::sendAccelZ() {
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "accel_z", "mg", 1);
+    String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "accel_z");
+    mqttPublisher_.publish(topic, msg, true);
+}
+
+void DiscoveryClient::sendAccelMagnitude() {
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "accel_magnitude", "mg", 1);
+    String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "accel_magnitude");
+    mqttPublisher_.publish(topic, msg, true);
+}
+
+void DiscoveryClient::sendAccelXYForce() {
+    String msg = DiscoveryMsg::createDiscoveryMsg(chipid_, "none", "accel_xy_force", "mg", 1);
+    String topic = DiscoveryMsg::createDiscoveryMsgTopic(chipid_, "accel_xy_force");
+    mqttPublisher_.publish(topic, msg, true);
+}
