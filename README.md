@@ -1,6 +1,13 @@
 # Sensorwebben Device Documentation
 
 ## Table of Contents
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+- [How It Works](#how-it-works)
+- [Software](#software)
+- [Hardware and Sensor Products](#hardware-and-sensor-products)
+- [Future Plans](#future-plans)
+- [Additional Resources](#additional-resources)
 
 This repository contains complete open-source designs for IoT sensor devices, including both firmware and hardware (PCB layouts, circuit diagrams, and enclosure designs). The devices are built around ESP8266/ESP32 microcontrollers and integrate seamlessly with Home Assistant via MQTT.
 
@@ -14,8 +21,6 @@ The project prioritizes open-source tools and libraries to ensure accessibility 
 * **KiCad 9.0.6** - PCB design and schematic capture
 * **FreeCAD 1.0.2** - 3D enclosure design
 * **Git** - Version control and collaboration
-
-**Development Tools**: The codebase leverages modern C++ practices within the Arduino framework, with modular interfaces for sensors and publishers to ensure extensibility.
 
 If you have suggestions for improvements, please consider contributing via pull-requests, opening an issue or contact me via pm or email.
 
@@ -60,12 +65,6 @@ Before deploying sensor devices, ensure you have:
 1. **WiFi Network**: Stable 2.4GHz WiFi coverage at deployment location
 2. **Home Assistant**: Running instance with MQTT integration enabled
 3. **MQTT Broker**: Mosquitto or similar (often bundled with Home Assistant)
-
-### For Developers
-
-1. **Development Environment**: PlatformIO with ESP32/ESP8266 platform support
-2. **Hardware**: ESP development board or custom PCB with auto-reset capability
-3. **Testing Setup**: MQTT broker for local development and testing
 
 For more details on Home Assistant, visit: [Home Assistant](https://www.home-assistant.io/).
 
@@ -119,111 +118,17 @@ The red LED blinks to indicate errors:
 
 ![Home Assistant Added Sensor with First Values](doc/ha-added-sensor-w-first-values.png)
 
-## Software Architecture
+## Software
 
-### Core Interfaces
+The firmware is built using modern embedded development practices with PlatformIO and Arduino framework. The code features modular architecture, clean interfaces, and support for multiple hardware platforms.
 
-The firmware uses clean abstraction layers for extensibility:
+**Key Software Features**:
+* Modular sensor and publisher interfaces
+* Multiple build environments for different hardware variants  
+* Automatic dependency management
+* Comprehensive device support (ESP8266/ESP32)
 
-**Sensor Interface** (`Sensor.h`)
-```cpp
-class Sensor {
-public:
-    virtual bool begin() = 0;
-    virtual bool readSensor() = 0;
-    virtual String getDiscoveryMsg() = 0;
-    virtual String getPublishMsg() = 0;
-};
-```
-
-**Publisher Interface** (`Publisher.h`)
-```cpp
-class Publisher {
-public:
-    virtual bool connect() = 0;
-    virtual bool publish(String topic, String payload, bool retain = false) = 0;
-    virtual bool isConnected() = 0;
-};
-```
-
-### Implemented Components
-
-**Sensor Drivers**:
-
-* `DhtSensor` - DHT11/DHT22 via Adafruit DHT library
-* `Hx711Sensor` - Precision weight measurement
-* `Adxl345Sensor` - 3-axis accelerometer (I2C)
-* `Ds18bSensor` - 1-Wire temperature sensors
-
-**Publishers**:
-
-* `MqttPublisher` - Local MQTT broker communication
-* `HaRemoteClient` - Nabu Casa webhook integration
-
-### Project Structure
-
-```
-├── sw/                  # Software (PlatformIO project)
-│   ├── src/             # Main application code
-│   ├── include/         # Header files and interfaces
-│   ├── lib/             # External dependencies
-│   ├── platformio.ini   # Build configuration
-│   └── test/            # Test files
-├── hw/                  # Hardware designs (KiCad)
-├── doc/                 # Technical documentation
-└── readme.md            # This documentation
-```
-
-### PlatformIO Build System
-
-Multiple build environments support different hardware platforms and use cases:
-
-#### Platform Configurations
-
-**ESP8266 Targets**:
-```ini
-[env:esp8266_*]
-platform = espressif8266
-board = esp07  ; or d1_mini
-framework = arduino
-board_build.flash_mode = dout
-board_build.f_cpu = 80000000L
-upload_speed = 115200
-```
-
-**ESP32 Targets**:
-```ini
-[env:esp32_*]
-platform = espressif32
-board = esp32dev
-framework = arduino
-upload_protocol = esptool
-; Auto-reset timing optimized for custom PCBs
-```
-
-#### Device-Specific Environments
-
-Each hardware variant has dedicated build configurations:
-
-* `misto_*` - Multi-sensor environmental monitoring
-* `apiscale_*` - Precision weight measurement platform  
-* `cattoy_*` - Pet activity detection and monitoring
-* `*_test` - Development and hardware validation
-
-#### Usage
-```bash
-# Navigate to software directory
-cd sw/
-
-# Build specific environment
-pio run -e misto_setup
-
-# Upload to target device
-pio run -e esp32_test --target upload
-
-# Monitor serial output
-pio device monitor -e esp32_test
-```
+For detailed software documentation, build instructions, and development information, see the [Software Documentation](sw/).
 
 ## Hardware and sensor products
 
